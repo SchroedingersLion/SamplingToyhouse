@@ -25,9 +25,9 @@ int main(int argc, char *argv[]){
     const int randomseed = 0;
     const int batchsize = 5;
 
-    PROBLEM gm_mix_esti(filename, batchsize, randomseed);    /* construct object of the problem class defined by the user in header "setup_classes.h". */
+    PROBLEM harmonic_osc;    /* construct object of the problem class defined by the user in header "setup_classes.h". */
     
-    testsampler.run_mpi_simulation(argc, argv, iter, gm_mix_esti, outputfile, t_meas, tavg, n_tavg, n_dist);  /* run sampler. "measurement" needs to be defined 
+    testsampler.run_mpi_simulation(argc, argv, iter, harmonic_osc, outputfile, t_meas, tavg, n_tavg, n_dist);  /* run sampler. "measurement" needs to be defined 
                                                                                                             by user in header "setup_classes.h". It holds
                                                                                                             information of what quantities need to be obtained
                                                                                                             by the sampler and how to compute and print them.  */
