@@ -3,7 +3,7 @@
 
 // ##### ISAMPLER METHODS ##### //
 
-void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
+void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
 
     MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed.
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -100,7 +100,7 @@ void OBABO_sampler::print_params(){
 
 
 
-measurement OBABO_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
+measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
 
     // set integrator constants
     const double a = exp(-1*gamma*h);    
@@ -199,7 +199,7 @@ void SGHMC_sampler::print_params(){
 
 
 
-measurement SGHMC_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
+measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
 
     // set integrator constants
     const double one_minus_hgamma = 1-h*gamma;    
@@ -277,7 +277,9 @@ void BBK_AMAGOLD_sampler::print_params(){
 
 
 
-measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
+measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
+
+    std::cout<<"entering collect samples"<<std::endl;
 
     // set integrator constants
     const double one_plus_hgamma_half_inv = 1 / (1+0.5*h*gamma);    
@@ -305,7 +307,7 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, PROBLEM pro
     double Rn;
 
 	auto t1 = std:: chrono::high_resolution_clock::now();
-
+    std::cout<<"starting main loop"<<std::endl;
     // MAIN LOOP
     for ( size_t i = 1;  i <= max_iter;  ++i ) {
         

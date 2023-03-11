@@ -12,21 +12,43 @@ constexpr double PI = 3.141592653589793;    // some useful constants
 constexpr double eps = 1e-12;
 
 
+class IPROBLEM {
+
+    public:
+
+        // parameters, velocities, forces 
+        std:: vector <double> parameters;
+        std:: vector <double> velocities;       
+        std:: vector <double> forces;           
+        
+        IPROBLEM(const std:: vector <double>& init_params, const std:: vector <double>& init_velocities)
+            : parameters{init_params}, velocities{init_velocities}, forces{std:: vector <double> (parameters.size(),0)} {};
+
+        // fill force vector
+        virtual void compute_force() = 0;
+
+        virtual ~IPROBLEM(){};
+
+};
+
+
+
+
 // #### HARMONIC OSCILLATOR #### //
 
-class PROBLEM {
+class HARMONIC_OSCILLATOR_1D: public IPROBLEM {
 
     // THIS PROBLEM IS THE 1D HARMONIC OSCILLATOR
 
     public:
-        // parameters, velocities, forces 
-        std:: vector <double> parameters {0};       // CARE! THE SAMPLERS REQUIRE THIS VECTOR
-        std:: vector <double> velocities {0};       // CARE! THE SAMPLERS REQUIRE THIS VECTOR
-        std:: vector <double> forces {0};           // CARE! THE SAMPLERS REQUIRE THIS VECTOR
+
+        HARMONIC_OSCILLATOR_1D(const double omega_squared, const std:: vector <double>& init_params, const std:: vector <double>& init_velocities)
+        : IPROBLEM(init_params, init_velocities), omega_sq{omega_squared} {
+        }
 
         // fill force vector
-        void compute_force(){                           /* CARE! THE SAMPLERS REQUIRE THIS FUNCTION. 
-                                                           It needs to be written by the user. */           
+        void compute_force() override{                           
+                                                               
             forces[0] = -omega_sq * parameters[0];
             
             return;
@@ -35,7 +57,7 @@ class PROBLEM {
 
     private:
 
-        const double omega_sq = 25;
+        const double omega_sq;
 
 };
 

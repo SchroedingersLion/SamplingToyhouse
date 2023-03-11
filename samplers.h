@@ -23,13 +23,13 @@ class ISAMPLER{
 
     private:
 
-        virtual measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) = 0;      // actual sampling method. 
+        virtual measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) = 0;      // actual sampling method. 
 
 
     public:
 
         /* sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging. */
-        void run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);
+        void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);
 
         virtual void print_params();    // prints sampler hyperparameters.
 
@@ -53,7 +53,7 @@ class OBABO_sampler: public ISAMPLER{
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) override;  // draws a single sampling trajectory
+        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;  // draws a single sampling trajectory
 
 
     public:
@@ -80,7 +80,7 @@ class SGHMC_sampler: public ISAMPLER{
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) override;
+        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;
    
    
     public:
@@ -105,7 +105,7 @@ class BBK_AMAGOLD_sampler: public ISAMPLER{
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) override;
+        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;
 
 
     public:

@@ -16,14 +16,14 @@ int main(int argc, char *argv[]){
     int t_meas = 1;         // take measurement every t_meas iterations (passed to sampler as well as print functions).
     int n_dist = 1;         // print and t-average (if activated) only every n_dist-th values.
 
-    SGHMC_sampler testsampler(T,gamma,h);
+    BBK_AMAGOLD_sampler testsampler(T,gamma,h);
 
     std:: string filename = "GM_data_5000.csv";
     std:: string outputfile = "RESULTS.csv";
     const int randomseed = 0;
     const int batchsize = 5;
 
-    PROBLEM harmonic_osc;    /* construct object of the problem class defined by the user in header "setup_classes.h". */
+    HARMONIC_OSCILLATOR_1D harmonic_osc(25, std::vector<double>{0}, std::vector<double>{0});    /* construct object of the problem class defined by the user in header "setup_classes.h". */
     
     testsampler.run_mpi_simulation(argc, argv, iter, harmonic_osc, outputfile, t_meas, tavg, n_tavg, n_dist);  /* run sampler. "measurement" needs to be defined 
                                                                                                             by user in header "setup_classes.h". It holds
