@@ -72,30 +72,32 @@ class OBABO_sampler: public ISAMPLER{
 
 
 
-class SGHMC{
+class SGHMC_sampler: public ISAMPLER{
 
     private:
+
         const double T;
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas);
-
+        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) override;
+   
+   
     public:
 
-        SGHMC(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {
+        SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {
         }
 
-        void run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);  
+        void print_params() override;
 
-        void print_sampler_params();
+        ~SGHMC_sampler(){};
 
 };
 
 
 
 
-class BBK_AMAGOLD{
+class BBK_AMAGOLD_sampler: public ISAMPLER{
 
     private:
 
@@ -103,17 +105,17 @@ class BBK_AMAGOLD{
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas);
+        measurement collect_samples(const int max_iter, PROBLEM POTCLASS, const int randomseed, const int t_meas) override;
 
 
     public:
 
-        BBK_AMAGOLD(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {   
+        BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {   
         }
 
-    void run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);  
+        void print_params() override;
 
-    void print_sampler_params();
+        ~BBK_AMAGOLD_sampler(){};
 
 };
 

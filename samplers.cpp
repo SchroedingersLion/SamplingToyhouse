@@ -187,97 +187,19 @@ measurement OBABO_sampler::collect_samples(const int max_iter, PROBLEM problem, 
 
 
 
+
 // ##### SGHMC METHODS ##### //
 
-void SGHMC::print_sampler_params(){
+void SGHMC_sampler::print_params(){
     
-    std:: cout << "Sampler parameters:\n";
+    std:: cout << "SGHMC sampling with parameters:\n";
     std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
 
 };
 
 
 
-void SGHMC::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
-    
-    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed
-    MPI_Comm comm = MPI_COMM_WORLD;
-    int rank, nr_proc;
-    MPI_Comm_rank(comm, &rank);
-    MPI_Comm_size(comm, &nr_proc);
-
-    const int seed = rank;
-
-    print_sampler_params();
-    measurement RESULTS = SGHMC::collect_samples(max_iter, POTCLASS, seed, t_meas);    // run sampler
-
-    std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
-    MPI_Barrier(comm);
-
-    // sum up results of different processors 
-    measurement RESULTS_AVG;
-    int row_size;
-
-    for ( size_t i = 0;  i < RESULTS.measured_values.size();  ++i){
-        
-        row_size = RESULTS.measured_values[i].size();
-        if( rank==0 ) RESULTS_AVG.measured_values[i].resize( row_size );     // only on rank 0 to save RAM.
-
-        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS_AVG.measured_values[i][0], row_size, MPI_DOUBLE, MPI_SUM, 0, comm);
-
-    }	 
-
-    // compute average
-    if( rank==0 ){
-
-        // average over processes
-        std:: cout << "Average over processes..." << std:: endl;
-        for ( size_t i = 0;  i < RESULTS_AVG.measured_values.size();  ++i){
-            row_size = RESULTS_AVG.measured_values[i].size();
-            for ( int j = 0;  j < row_size;  ++j ){
-                RESULTS_AVG.measured_values[i][j] /= nr_proc;
-            }
-        }
-        
-    // time average
-        if ( tavg == true ){
-
-            std:: cout << "Time averaging...\n";
-            int n_tavg_temp;
-            
-            for ( size_t row = 0;  row < RESULTS_AVG.measured_values.size();  ++row ){   // t-average one row at a time.
-            
-                n_tavg_temp = n_tavg;
-            
-                for ( int i = RESULTS_AVG.measured_values[row].size() - 1;  i >= 0;  i -= n_dist ){
-                
-                    if ( i <= n_tavg_temp - 1 ) n_tavg_temp = i;
-                    for ( int j = i - n_tavg_temp;  j < i;  ++j ){
-                        RESULTS_AVG.measured_values[row][i] += RESULTS_AVG.measured_values[row][j];
-
-                    }
-                    RESULTS_AVG.measured_values[row][i] /= (n_tavg_temp + 1);
-
-                }
-            }
-        
-        } // end time average
-
-    }
-
-    if ( rank == 0) RESULTS_AVG.print_to_csv(t_meas, n_dist, outputfile);     // print to file, as specified by the user in the "measurement" class.
-
-    MPI_Finalize();
-
-    return;
-
-};
-
-
-
-measurement SGHMC::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
-
-    std:: cout << "Starting SGHMC simulation...\n" << std:: endl;
+measurement SGHMC_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
 
     // set integrator constants
     const double one_minus_hgamma = 1-h*gamma;    
@@ -346,95 +268,16 @@ measurement SGHMC::collect_samples(const int max_iter, PROBLEM problem, const in
 
 // ##### BBK_AMAGOLD METHODS ##### //
 
-void BBK_AMAGOLD::print_sampler_params(){
+void BBK_AMAGOLD_sampler::print_params(){
     
-    std:: cout << "Sampler parameters:\n";
+    std:: cout << "BBK (AMAGOLD version) sampling with parameters:\n";
     std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
 
 };
 
 
 
-void BBK_AMAGOLD::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
-    
-    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed
-    MPI_Comm comm = MPI_COMM_WORLD;
-    int rank, nr_proc;
-    MPI_Comm_rank(comm, &rank);
-    MPI_Comm_size(comm, &nr_proc);
-
-    const int seed = rank;
-
-    print_sampler_params();
-    measurement RESULTS = BBK_AMAGOLD::collect_samples(max_iter, POTCLASS, seed, t_meas);    // run sampler
-
-    std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
-    MPI_Barrier(comm);
-
-    // sum up results of different processors 
-    measurement RESULTS_AVG;
-    int row_size;
-
-    for ( size_t i = 0;  i < RESULTS.measured_values.size();  ++i){
-        
-        row_size = RESULTS.measured_values[i].size();
-        if( rank==0 ) RESULTS_AVG.measured_values[i].resize( row_size );     // only on rank 0 to save RAM.
-
-        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS_AVG.measured_values[i][0], row_size, MPI_DOUBLE, MPI_SUM, 0, comm);
-
-    }	 
-
-    // compute average
-    if( rank==0 ){
-
-        // average over processes
-        std:: cout << "Average over processes..." << std:: endl;
-        for ( size_t i = 0;  i < RESULTS_AVG.measured_values.size();  ++i){
-            row_size = RESULTS_AVG.measured_values[i].size();
-            for ( int j = 0;  j < row_size;  ++j ){
-                RESULTS_AVG.measured_values[i][j] /= nr_proc;
-            }
-        }
-        
-    // time average
-        if ( tavg == true ){
-
-            std:: cout << "Time averaging...\n";
-            int n_tavg_temp;
-            
-            for ( size_t row = 0;  row < RESULTS_AVG.measured_values.size();  ++row ){   // t-average one row at a time.
-            
-                n_tavg_temp = n_tavg;
-            
-                for ( int i = RESULTS_AVG.measured_values[row].size() - 1;  i >= 0;  i -= n_dist ){
-                
-                    if ( i <= n_tavg_temp - 1 ) n_tavg_temp = i;
-                    for ( int j = i - n_tavg_temp;  j < i;  ++j ){
-                        RESULTS_AVG.measured_values[row][i] += RESULTS_AVG.measured_values[row][j];
-
-                    }
-                    RESULTS_AVG.measured_values[row][i] /= (n_tavg_temp + 1);
-
-                }
-            }
-        
-        } // end time average
-
-    }
-
-    if ( rank == 0) RESULTS_AVG.print_to_csv(t_meas, n_dist, outputfile);     // print to file, as specified by the user in the "measurement" class.
-
-    MPI_Finalize();
-
-    return;
-
-};
-
-
-
-measurement BBK_AMAGOLD::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
-
-    std:: cout << "Starting BBK simulation...\n" << std:: endl;
+measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
 
     // set integrator constants
     const double one_plus_hgamma_half_inv = 1 / (1+0.5*h*gamma);    
