@@ -1,19 +1,11 @@
 #include "samplers.h"
 
-// ##### OBABO METHODS ##### //
 
-void OBABO::print_sampler_params(){
-    
-    std:: cout << "Sampler parameters:\n";
-    std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
+// ##### ISAMPLER METHODS ##### //
 
-};
+void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
 
-
-
-void OBABO::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBLEM POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
-    
-    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed
+    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed.
     MPI_Comm comm = MPI_COMM_WORLD;
     int rank, nr_proc;
     MPI_Comm_rank(comm, &rank);
@@ -21,13 +13,13 @@ void OBABO::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBL
 
     const int seed = rank;
 
-    print_sampler_params();
-    measurement RESULTS = OBABO::collect_samples(max_iter, POTCLASS, seed, t_meas);    // run sampler
+    print_params();
+    measurement RESULTS = collect_samples(max_iter, POTCLASS, seed, t_meas);    // run sampler.
 
     std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
     MPI_Barrier(comm);
 
-    // sum up results of different processors 
+    // sum up results of different processors. 
     measurement RESULTS_AVG;
     int row_size;
 
@@ -40,10 +32,10 @@ void OBABO::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBL
 
     }	 
 
-    // compute average
+    // compute average.
     if( rank==0 ){
 
-        // average over processes
+        // average over processes.
         std:: cout << "Average over processes..." << std:: endl;
         for ( size_t i = 0;  i < RESULTS_AVG.measured_values.size();  ++i){
             row_size = RESULTS_AVG.measured_values[i].size();
@@ -74,7 +66,7 @@ void OBABO::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBL
                 }
             }
         
-        } // end time average
+        } // end time average.
 
     }
 
@@ -88,9 +80,27 @@ void OBABO::run_mpi_simulation(int argc, char *argv[], const int max_iter, PROBL
 
 
 
-measurement OBABO::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
+void ISAMPLER::print_params(){    // default behavior in case derived classes don't override.
 
-    std:: cout << "Starting OBABO simulation...\n" << std:: endl;
+    std::cout << "\n";
+
+};
+
+
+
+
+// ##### OBABO METHODS ##### //
+
+void OBABO_sampler::print_params(){
+    
+    std:: cout << "OBABO sampling with parameters:\n";
+    std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
+
+};
+
+
+
+measurement OBABO_sampler::collect_samples(const int max_iter, PROBLEM problem, const int randomseed, const int t_meas){
 
     // set integrator constants
     const double a = exp(-1*gamma*h);    
