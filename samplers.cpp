@@ -102,22 +102,22 @@ void OBABO_sampler::print_params(){
 
 measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
 
-    // set integrator constants
+    // set integrator constants.
     const double a = exp(-1*gamma*h);    
     const double sqrt_a = sqrt(a);
     const double sqrt_aT = sqrt((1-a)*T);
     const double h_half = 0.5*h;   
 
-    size_t No_params = problem.parameters.size();  // number of parameters
+    size_t No_params = problem.parameters.size();  // number of parameters.
 
-    // COMPUTE INITIAL FORCES
+    // COMPUTE INITIAL FORCES.
     problem.compute_force();
 
-    // COMPUTE INITIAL MEASUREMENTS
+    // COMPUTE INITIAL MEASUREMENTS.
     measurement RESULTS;
     RESULTS.take_measurement(problem.parameters, problem.velocities);
 
-    // PREPARE RNG
+    // PREPARE RNG.
     std:: mt19937 twister;
     
     std:: seed_seq seq{1,20,3200,403,5*randomseed+1,12000,73667,9474+randomseed,19151-randomseed};
@@ -131,10 +131,10 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 
 	auto t1 = std:: chrono::high_resolution_clock::now();
 
-    // MAIN LOOP
+    // MAIN LOOP.
     for ( size_t i = 1;  i <= max_iter;  ++i ) {
 
-        // O + B steps
+        // O + B steps.
         for ( size_t j = 0;  j < No_params;  ++j ) {                  
             
             Rn = normal(twister);
@@ -142,24 +142,24 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
         
         }
 
-        // A step
+        // A step.
         for ( size_t j = 0;  j < No_params;  ++j ) {
 
             problem.parameters[j] += h * problem.velocities[j];
         
         }	
   
-        // COMPUTE NEW FORCES
+        // COMPUTE NEW FORCES.
         problem.compute_force();
 
-        // B STEP
+        // B STEP.
         for ( size_t j = 0;  j < No_params;  ++j ) {
 
             problem.velocities[j] += h_half * problem.forces[j];
         
         }   
 	
-        // O STEP
+        // O STEP.
         for ( size_t j = 0;  j < No_params;  ++j ) {
             
 		    Rn = normal(twister);
@@ -167,21 +167,22 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
         
         }   								 
 
-        // TAKE MEASUREMENT
+        // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
             RESULTS.take_measurement(problem.parameters, problem.velocities); 
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
 	
-	}  // END MAIN LOOP
+	}  // END MAIN LOOP.
 
-    // FINALIZE
+    // FINALIZE.
     auto t2 = std:: chrono:: high_resolution_clock:: now();
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
         
     return RESULTS;
+
 };
 
 
@@ -201,20 +202,20 @@ void SGHMC_sampler::print_params(){
 
 measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
 
-    // set integrator constants
+    // set integrator constants.
     const double one_minus_hgamma = 1-h*gamma;    
     const double noise_pref = sqrt(2*h*gamma*T);  
 
-    size_t No_params = problem.parameters.size();  // number of parameters
+    size_t No_params = problem.parameters.size();  // number of parameters.
 
-    // COMPUTE INITIAL FORCES
+    // COMPUTE INITIAL FORCES.
     problem.compute_force();
 
-    // COMPUTE INITIAL MEASUREMENTS
+    // COMPUTE INITIAL MEASUREMENTS.
     measurement RESULTS;
     RESULTS.take_measurement(problem.parameters, problem.velocities);
 
-    // PREPARE RNG
+    // PREPARE RNG.
     std:: mt19937 twister;
     
     std:: seed_seq seq{1,20,3200,403,5*randomseed+1,12000,73667,9474+randomseed,19151-randomseed};
@@ -227,33 +228,33 @@ measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 
 	auto t1 = std:: chrono::high_resolution_clock::now();
 
-    // MAIN LOOP
+    // MAIN LOOP.
     for ( size_t i = 1;  i <= max_iter;  ++i ) {
         
-        // UPDATE
+        // UPDATE.
         for ( size_t j = 0;  j < No_params;  ++j ) {                  
             
             Rn = normal(twister);
-            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; // momentum update
-            problem.parameters[j] += h * problem.velocities[j];                                                             // parameter update
+            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; // momentum update.
+            problem.parameters[j] += h * problem.velocities[j];                                                             // parameter update.
         
         }
   
-        // COMPUTE NEW FORCES
+        // COMPUTE NEW FORCES.
         problem.compute_force();
 					 
 
-        // TAKE MEASUREMENT
+        // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
             RESULTS.take_measurement(problem.parameters, problem.velocities); 
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
 	
-	}  // END MAIN LOOP
+	}  // END MAIN LOOP.
 
 
-    // FINALIZE
+    // FINALIZE.
     auto t2 = std:: chrono:: high_resolution_clock:: now();
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
@@ -281,21 +282,21 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
 
     std::cout<<"entering collect samples"<<std::endl;
 
-    // set integrator constants
+    // set integrator constants.
     const double one_plus_hgamma_half_inv = 1 / (1+0.5*h*gamma);    
     const double one_minus_hgamma_half = 1-0.5*h*gamma;
     const double noise_pref = sqrt(2*h*gamma*T);  
 
-    size_t No_params = problem.parameters.size();  // number of parameters
+    size_t No_params = problem.parameters.size();  // number of parameters.
 
-    // COMPUTE INITIAL FORCES
+    // COMPUTE INITIAL FORCES.
     problem.compute_force();
 
-    // COMPUTE INITIAL MEASUREMENTS
+    // COMPUTE INITIAL MEASUREMENTS.
     measurement RESULTS;
     RESULTS.take_measurement(problem.parameters, problem.velocities);
 
-    // PREPARE RNG
+    // PREPARE RNG.
     std:: mt19937 twister;
     
     std:: seed_seq seq{1,20,3200,403,5*randomseed+1,12000,73667,9474+randomseed,19151-randomseed};
@@ -308,10 +309,11 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
 
 	auto t1 = std:: chrono::high_resolution_clock::now();
     std::cout<<"starting main loop"<<std::endl;
-    // MAIN LOOP
+   
+    // MAIN LOOP.
     for ( size_t i = 1;  i <= max_iter;  ++i ) {
         
-        // UPDATE
+        // UPDATE.
         for ( size_t j = 0;  j < No_params;  ++j ) {                  
             
             problem.velocities[j] *= one_minus_hgamma_half;
@@ -321,21 +323,21 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
         
         }
   
-        // COMPUTE NEW FORCES
+        // COMPUTE NEW FORCES.
         problem.compute_force();
 					 
 
-        // TAKE MEASUREMENT
+        // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
             RESULTS.take_measurement(problem.parameters, problem.velocities); 
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
 	
-	}  // END MAIN LOOP
+	}  // END MAIN LOOP.
 
 
-    // FINALIZE
+    // FINALIZE.
     auto t2 = std:: chrono:: high_resolution_clock:: now();
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";

@@ -1,7 +1,7 @@
 #ifndef SAMPLERS_H
 #define SAMPLERS_H
 
-
+#define _USE_MATH_DEFINES 
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -9,7 +9,6 @@
 #include <string>
 #include <sstream>
 #include <chrono>
-#include <math.h> 
 #include <iomanip>
 #include <algorithm>
 #include <limits>
@@ -20,18 +19,24 @@
 
 
 class ISAMPLER{
+/*
+This is the interface class of the sampling schemes.
+The particular samplers are child classes inheriting from this class.
+In particular, they need to implement the collect_samples routine.
+*/
 
     private:
 
-        virtual measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) = 0;      // actual sampling method. 
+        /* Draws a single sampling trajectory. Needs to be defined in child classes. */
+        virtual measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) = 0;     
 
 
     public:
 
-        /* sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging. */
+        /* Sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging and prints to file. */
         void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);
 
-        virtual void print_params();    // prints sampler hyperparameters.
+        virtual void print_params();    // prints sampler hyperparameters, defined in child classes.
 
         virtual ~ISAMPLER(){};          // destructor.
 
@@ -41,30 +46,29 @@ class ISAMPLER{
 
 
 
-/* The OBABO sampler. It requires the "PROBLEM" class and the "measurement" class in header "setup_classes.h".
-   They need to be written by the user and define the sampling problem and what measurements to take. 
-   Note that the member functions below require those classes to be structured in a certain way. */
-
 class OBABO_sampler: public ISAMPLER{
+/*
+The OBABO splitting scheme.
+*/
 
     private:
 
-        const double T;
-        const double gamma;
-        const double h;
+        const double T;      // temperature.
+        const double gamma;  // friction.
+        const double h;      // stepsize.
 
-        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;  // draws a single sampling trajectory
+        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override; 
 
 
     public:
 
-        // constructors
+        // constructor.
         OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {
         }; 
 
-        void print_params() override;
+        void print_params() override;  
 
-        ~OBABO_sampler(){};    
+        ~OBABO_sampler(){};            // destructor.
 
 
 };
@@ -73,6 +77,10 @@ class OBABO_sampler: public ISAMPLER{
 
 
 class SGHMC_sampler: public ISAMPLER{
+/*
+The SGHMC sampler (Chen et al. 2014).
+Note that whether stochastic gradients are actually used depends on the force routine specified in the problem class passed as an argument.
+*/
 
     private:
 
@@ -85,12 +93,12 @@ class SGHMC_sampler: public ISAMPLER{
    
     public:
 
-        SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {
+        SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // constructor.
         }
 
         void print_params() override;
 
-        ~SGHMC_sampler(){};
+        ~SGHMC_sampler(){};              // destructor
 
 };
 
@@ -98,6 +106,9 @@ class SGHMC_sampler: public ISAMPLER{
 
 
 class BBK_AMAGOLD_sampler: public ISAMPLER{
+/*
+The BBK scheme used in the AMAGOLD method (Zhang et al., 2020).
+*/
 
     private:
 
@@ -110,19 +121,14 @@ class BBK_AMAGOLD_sampler: public ISAMPLER{
 
     public:
 
-        BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {   
+        BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {           // consructor.
         }
 
         void print_params() override;
 
-        ~BBK_AMAGOLD_sampler(){};
+        ~BBK_AMAGOLD_sampler(){};               // destructor.
 
 };
-
-
-
-
-
 
 
 
