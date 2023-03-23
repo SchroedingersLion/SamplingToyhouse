@@ -70,8 +70,36 @@ The OBABO splitting scheme.
 
         ~OBABO_sampler(){};            // Destructor.
 
+};
+
+
+
+
+class BAOAB_sampler: public ISAMPLER{
+/*
+The BAOAB splitting scheme.
+*/
+
+    private:
+
+        const double T;      // Temperature.
+        const double gamma;  // Friction.
+        const double h;      // Stepsize.
+
+        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
+
+
+    public:
+
+        BAOAB_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
+        }; 
+
+        void print_sampler_params() override;  
+
+        ~BAOAB_sampler(){};            // Destructor.
 
 };
+
 
 
 
