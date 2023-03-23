@@ -14,7 +14,7 @@
 #include <limits>
 #include <numeric>
 #include <iterator>
-#include "setup_classes.h"
+#include "problems.h"
 #include "measurements.h"
 #include <mpi.h>
 

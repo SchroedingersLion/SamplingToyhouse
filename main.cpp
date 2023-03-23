@@ -1,5 +1,5 @@
 #include "samplers.h"
-#include "setup_classes.h"
+#include "problems.h"
 #include "measurements.h"
 
 int main(int argc, char *argv[]){
@@ -15,8 +15,8 @@ int main(int argc, char *argv[]){
     int n_dist = 1000;         // print and t-average (if activated) only every n_dist-th values.
 
     // OBABO_sampler testsampler(T, gamma, h);     // construct OBABO object defined in header "samplers.h"
-    // SGHMC_sampler testsampler(T,gamma,h);
-    BBK_AMAGOLD_sampler testsampler(T,gamma,h);
+    SGHMC_sampler testsampler(T,gamma,h);
+    // BBK_AMAGOLD_sampler testsampler(T,gamma,h);
 
     // std:: string filename = "GM_data_5000.csv";
     // const int randomseed = 0;
@@ -24,8 +24,8 @@ int main(int argc, char *argv[]){
     // BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D problem(filename, batchsize);    /* construct object of the problem class defined by the user in header "setup_classes.h". */
     
     HARMONIC_OSCILLATOR_1D problem;
-    
-    MEASUREMENT_HO_1D RESULTS(2, n_dist);
+
+    MEASUREMENT_HO_1D RESULTS(n_dist);
 
     std:: string outputfile = "RESULTS.csv";
 
