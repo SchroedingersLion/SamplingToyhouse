@@ -1,5 +1,5 @@
-#ifndef SETUP_CLASSES_H
-#define SETUP_CLASSES_H
+#ifndef PROBLEMS_H
+#define PROBLEMS_H
 
 #include <vector>
 #define _USE_MATH_DEFINES 
@@ -260,4 +260,4 @@ The constructor needs to read in the data set, a .csv file of a single column ho
 };
 
 
-#endif // SETUP_CLASSES_H
+#endif // PROBLEMS_H
