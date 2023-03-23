@@ -5,35 +5,33 @@
 int main(int argc, char *argv[]){
 
 
-
-    double T = 1;           // sampler hyperparameters
+    double T = 1;           // Sampler hyperparameters
     double gamma = 20;
     double h = 0.01;
 
-    int iter = 10000;             // no. of iteration
-    int t_meas = 1;         // take measurement every t_meas iterations (passed to sampler as well as print functions).
-    int n_dist = 1000;         // print and t-average (if activated) only every n_dist-th values.
+    int iter = 100000;        // Number of iteration (sampler steps).
+    int t_meas = 1;          // Take measurement and use it for on-the-fly time-average every t_meas iterations.
+    int n_dist = 1000;       // Store and print-out any n_dist taken measurement. 
 
-    // OBABO_sampler testsampler(T, gamma, h);     // construct OBABO object defined in header "samplers.h"
-    SGHMC_sampler testsampler(T,gamma,h);
-    // BBK_AMAGOLD_sampler testsampler(T,gamma,h);
 
-    // std:: string filename = "GM_data_5000.csv";
-    // const int randomseed = 0;
-    // const int batchsize = 5;
-    // BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D problem(filename, batchsize);    /* construct object of the problem class defined by the user in header "setup_classes.h". */
+    // ### CONSTRUCT ONE OF THE SAMPLERS DEFINED IN "samplers.h". ### //
+    OBABO_sampler testsampler(T, gamma, h);    
+
     
-    // HARMONIC_OSCILLATOR_1D problem;
-    DOUBLE_GAUSSIAN_BASINS_2D problem;
+    // ### CONSTRUCT THE PROBLEM TO BE SAMPLED ON, DEFINED IN "problems.h". ### //
+    HARMONIC_OSCILLATOR_1D testproblem;
 
+    
+    // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
     MEASUREMENT_DEFAULT RESULTS(n_dist);
 
-    std:: string outputfile = "RESULTS.csv";
+    std:: string outputfile = "RESULTS.csv";  // Name of output file.
 
-    testsampler.run_mpi_simulation(argc, argv, iter, problem, RESULTS, outputfile, t_meas);          /* run sampler. "measurement" needs to be defined 
-                                                                                                            by user in header "setup_classes.h". It holds
-                                                                                                            information of what quantities need to be obtained
-                                                                                                            by the sampler and how to compute and print them.  */
+
+    // ### RUN SAMPLER. ### //
+    testsampler.run_mpi_simulation(argc, argv, iter, testproblem, RESULTS, outputfile, t_meas);          
+
+
 
     return 0;
 

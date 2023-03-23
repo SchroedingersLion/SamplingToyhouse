@@ -37,9 +37,9 @@ In particular, they need to implement the collect_samples routine.
         /* Sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging and prints to file. */
         void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas);
 
-        virtual void print_sampler_params();    // prints sampler hyperparameters, defined in child classes.
+        virtual void print_sampler_params();    // Prints sampler hyperparameters, defined in child classes.
 
-        virtual ~ISAMPLER(){};          // destructor.
+        virtual ~ISAMPLER(){};          // Destructor.
 
 
 };
@@ -54,22 +54,21 @@ The OBABO splitting scheme.
 
     private:
 
-        const double T;      // temperature.
-        const double gamma;  // friction.
-        const double h;      // stepsize.
+        const double T;      // Temperature.
+        const double gamma;  // Friction.
+        const double h;      // Stepsize.
 
         void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
 
 
     public:
 
-        // constructor.
-        OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {
+        OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
         }; 
 
         void print_sampler_params() override;  
 
-        ~OBABO_sampler(){};            // destructor.
+        ~OBABO_sampler(){};            // Destructor.
 
 
 };
@@ -94,12 +93,12 @@ Note that whether stochastic gradients are actually used depends on the force ro
    
     public:
 
-        SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // constructor.
+        SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
         }
 
         void print_sampler_params() override;
 
-        ~SGHMC_sampler(){};              // destructor
+        ~SGHMC_sampler(){};              // Destructor
 
 };
 
@@ -122,12 +121,12 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020).
 
     public:
 
-        BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {           // consructor.
+        BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {           // Consructor.
         }
 
         void print_sampler_params() override;
 
-        ~BBK_AMAGOLD_sampler(){};               // destructor.
+        ~BBK_AMAGOLD_sampler(){};               // Destructor.
 
 };
 

@@ -5,7 +5,7 @@
 
 void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas){
     
-    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed
+    MPI_Init(&argc, &argv);				// Initialize MPI, use rank as random seed.
     MPI_Comm comm = MPI_COMM_WORLD;
     int rank, nr_proc;
     MPI_Comm_rank(comm, &rank);
@@ -14,29 +14,30 @@ void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IP
     const int seed = rank;
 
     print_sampler_params();
-    collect_samples(max_iter, problem, RESULTS, seed, t_meas);    // run sampler
+    collect_samples(max_iter, problem, RESULTS, seed, t_meas);    // Run sampler.
 
     std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
     MPI_Barrier(comm);
 
-    // sum up results of different processors. 
+    // Sum up results of different processors. 
     int row_size;
 
     for ( size_t i = 0;  i < RESULTS.measured_values.size();  ++i){
         
         row_size = RESULTS.measured_values[i].size();
 
-        if( rank==0 ) RESULTS.measured_values_AVG[i].resize( row_size );     // only on rank 0 to save RAM.
-        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS.measured_values_AVG[i][0], row_size, MPI_FLOAT, MPI_SUM, 0, comm);
+        if( rank==0 ) RESULTS.measured_values_AVG[i].resize( row_size );     // Only on rank 0 to save RAM.
+
+        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS.measured_values_AVG[i][0], row_size, MPI_FLOAT, MPI_SUM, 0, comm);  // Collect results from processes.
         
         if( rank==0 ){
             for ( int j = 0;  j < row_size;  ++j ){
-                RESULTS.measured_values_AVG[i][j] /= nr_proc;
+                RESULTS.measured_values_AVG[i][j] /= nr_proc;   // Divide by no. of processes to obtain averages.
             }
         }
     }	 
 
-    if ( rank == 0) RESULTS.print_to_csv(t_meas, outputfile);     // print to file, as specified by the user in the "measurement" class.
+    if ( rank == 0) RESULTS.print_to_csv(t_meas, outputfile);     // Print to file, as specified by the measurement classes.
    
     MPI_Finalize();
 
@@ -47,7 +48,7 @@ void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IP
 
 
 
-void ISAMPLER::print_sampler_params(){    // default behavior in case derived classes don't override.
+void ISAMPLER::print_sampler_params(){    // Default behavior in case derived classes don't override.
 
     std::cout << "\n";
 
@@ -68,13 +69,13 @@ void OBABO_sampler::print_sampler_params(){
 
 void OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
-    // set integrator constants.
+    // Integrator constants.
     const double a = exp(-1*gamma*h);    
     const double sqrt_a = sqrt(a);
     const double sqrt_aT = sqrt((1-a)*T);
     const double h_half = 0.5*h;   
 
-    size_t No_params = problem.parameters.size();  // number of parameters.
+    size_t No_params = problem.parameters.size();  // Number of parameters.
 
     // COMPUTE INITIAL FORCES.
     problem.compute_force();
@@ -132,9 +133,9 @@ void OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEAS
         
         }   			
 
-        // TAKE MEASUREMENT
+        // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                      
-            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);    // take measurement any t_meas steps.   
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);    // Take measurement any t_meas steps.   
         }
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
@@ -167,11 +168,11 @@ void SGHMC_sampler::print_sampler_params(){
 
 void SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
-    // set integrator constants.
+    // Integrator constants.
     const double one_minus_hgamma = 1-h*gamma;    
     const double noise_pref = sqrt(2*h*gamma*T);  
 
-    size_t No_params = problem.parameters.size();  // number of parameters.
+    size_t No_params = problem.parameters.size();  // Number of parameters.
 
     // COMPUTE INITIAL FORCES.
     problem.compute_force();
@@ -199,8 +200,8 @@ void SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEAS
         for ( size_t j = 0;  j < No_params;  ++j ) {                  
             
             Rn = normal(twister);
-            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; // momentum update.
-            problem.parameters[j] += h * problem.velocities[j];                                                             // parameter update.
+            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; // Momentum update.
+            problem.parameters[j] += h * problem.velocities[j];                                                             // Parameter update.
         
         }
   
@@ -209,8 +210,8 @@ void SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEAS
 					 
 
         // TAKE MEASUREMENT.
-		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
-            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces); 
+		if( i % t_meas == 0 ) {                                                 
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);   // Take measurement any t_meas steps.        
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
@@ -246,12 +247,12 @@ void BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem,
 
     std::cout<<"entering collect samples"<<std::endl;
 
-    // set integrator constants.
+    // Integrator constants.
     const double one_plus_hgamma_half_inv = 1 / (1+0.5*h*gamma);    
     const double one_minus_hgamma_half = 1-0.5*h*gamma;
     const double noise_pref = sqrt(2*h*gamma*T);  
 
-    size_t No_params = problem.parameters.size();  // number of parameters.
+    size_t No_params = problem.parameters.size();  // Number of parameters.
 
     // COMPUTE INITIAL FORCES.
     problem.compute_force();
@@ -291,8 +292,8 @@ void BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem,
 					 
 
         // TAKE MEASUREMENT.
-		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
-            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces); 
+		if( i % t_meas == 0 ) {                                                      
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);   // Take measurement any t_meas steps.   
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
