@@ -47,7 +47,7 @@ This problem is the 1D harmonic oscillator with spring konstant \omega^2.
     public:
 
         // constructor.
-        HARMONIC_OSCILLATOR_1D(const double omega_squared = 25, const std:: vector <double>& init_params = std:: vector <double> {0,0}, const std:: vector <double>& init_velocities = std:: vector <double> {0,0})
+        HARMONIC_OSCILLATOR_1D(const double omega_squared = 25, const std:: vector <double>& init_params = std:: vector <double> {0}, const std:: vector <double>& init_velocities = std:: vector <double> {0})
         : IPROBLEM(init_params, init_velocities), omega_sq{omega_squared} {
         }
 
@@ -60,61 +60,6 @@ This problem is the 1D harmonic oscillator with spring konstant \omega^2.
         };
 
 };
-
-
-// measrement class to be used with harmonic oscillator (later use inheritance).
-// class measurement{       
-
-//     /* The measurement class that defines what quantities are collected by the samplers, how they are computed, and
-//        printed to a file. This class needs to be modified by the user.
-//        In this example, we only save the first parameter (corresponding to the x-coordinate
-//        when used in the double well problem above), as well as the kinetic energy. */
-
-//     public:
-
-//         void take_measurement(std:: vector <double> parameters, std:: vector <double> velocities){  /* CARE!!! The samplers need this function.
-//                                                                                                        It needs to be written by the user. */
-            
-//             measured_values[0].push_back( parameters[0]*parameters[0] ); // conf. temp.
-//             measured_values[1].push_back( velocities[0]*velocities[0] ); // kin. temp.
-//             measured_values[2].push_back( parameters[0]*velocities[0] ); // covariance
-                
-//         }
-
-//         void print_to_csv(const int t_meas, const int n_dist, const std:: string outputname){    /* Print results to file. Routine needs to be written by the user. 
-//                                                                                   "t_meas" gives the number of sampler iterations between two measurments 
-//                                                                                   (it is passed here to get the correct iteration count in the output file.)*/
-
-//             std:: ofstream file{outputname};
-//             std:: cout << "Writing to file...\n";
-
-//             // print out zeroth row separately
-//             file << "0" << " ";
-//             for ( size_t j = 0; j<measured_values.size(); ++j ){  
-//                 file << measured_values[j][0] << " ";  
-//             }
-//             file << "\n";
-
-//             // print out every n_dist entries after the 0-th
-//             for ( size_t i = (measured_values[0].size()-1) % n_dist; i<measured_values[0].size(); i += n_dist )
-//             {
-//                 if(i==0) continue;
-//                 file << i*t_meas << " ";
-//                 for ( size_t j = 0; j<measured_values.size(); ++j ){
-//                     file << measured_values[j][i] << " ";  
-//                 }
-//                 file << "\n";
-//             }
-//             file.close();
-
-//         }
-
-//         std:: vector < std::vector <double> > measured_values {3};   // vector of vectors, storing the measured observables in its rows.
-
-// };
-
-
-
 
 
 
@@ -183,58 +128,6 @@ For a visualization see the website.
         };
 
 };
-
-
-// measurement class to be used with the double well problem (later use inheritance).
-// class measurement{
-
-//     /* The measurement class that defines what quantities are collected by the samplers, how they are computed, and
-//        printed to a file. This class needs to be modified by the user.
-//        In this example, we only save the first parameter (corresponding to the x-coordinate
-//        when used in the double well problem above), as well as the kinetic energy. */
-
-//     public:
-
-//         void take_measurement(std:: vector <double> parameters, std:: vector <double> velocities){  /* CARE!!! The samplers need this function.
-//                                                                                                        It needs to be written by the user. */
-            
-//             measured_values[0].push_back(parameters[0]);
-//             measured_values[1].push_back( 0.5 * (velocities[0]*velocities[0] + velocities[1]*velocities[1]) );
-        
-//         }
-
-//         void print_to_csv(const int t_meas, const int n_dist, const std:: string outputname){    /* Print results to file. Routine needs to be written by the user. 
-//                                                                                   "t_meas" gives the number of sampler iterations between two measurments 
-//                                                                                   (it is passed here to get the correct iteration count in the output file.)*/
-
-//             std:: ofstream file{outputname};
-//             std:: cout << "Writing to file...\n";
-
-//             // print out zeroth row separately
-//             file << "0" << " ";
-//             for ( size_t j = 0; j<measured_values.size(); ++j ){  
-//                 file << measured_values[j][0] << " ";  
-//             }
-//             file << "\n";
-
-//             // print out every n_dist entries after the 0-th
-//             for ( size_t i = (measured_values[0].size()-1) % n_dist; i<measured_values[0].size(); i += n_dist )
-//             {
-//                 if(i==0) continue;
-//                 file << i*t_meas << " ";
-//                 for ( size_t j = 0; j<measured_values.size(); ++j ){
-//                     file << measured_values[j][i] << " ";  
-//                 }
-//                 file << "\n";
-//             }
-//             file.close();
-
-//         }
-
-//         std:: vector < std::vector <double> > measured_values {2};   // vector of vectors, storing the measured observables in its rows.
-
-// };
-
 
 
 
@@ -365,56 +258,6 @@ The constructor needs to read in the data set, a .csv file of a single column ho
         };
 
 };
-
-
-
-// measurement class to be used with the bayesian inference problem (later use inheritance).
-class measurement{
-
-    /* The measurement class that defines what quantities are collected by the samplers, how they are computed, and
-       printed to a file. This class needs to be modified by the user.
-       In this example, we only save the first parameter (corresponding to the x-coordinate
-       when used in the double well problem above), as well as the kinetic energy. */
-
-    public:
-
-        void take_measurement(std:: vector <double> parameters, std:: vector <double> velocities){  
-            
-            measured_values[0].push_back(parameters[0]);
-            measured_values[1].push_back( 0.5 * (velocities[0]*velocities[0] + velocities[1]*velocities[1]) );
-        
-        }
-
-        void print_to_csv(const int t_meas, const int n_dist, const std:: string outputname){   
-
-            std:: ofstream file{outputname};
-            std:: cout << "Writing to file...\n";
-
-            // print out zeroth row separately
-            file << "0" << " ";
-            for ( size_t j = 0; j<measured_values.size(); ++j ){  
-                file << measured_values[j][0] << " ";  
-            }
-            file << "\n";
-
-            // print out every n_dist entries after the 0-th
-            for ( size_t i = (measured_values[0].size()-1) % n_dist; i<measured_values[0].size(); i += n_dist )
-            {
-                if(i==0) continue;
-                file << i*t_meas << " ";
-                for ( size_t j = 0; j<measured_values.size(); ++j ){
-                    file << measured_values[j][i] << " ";  
-                }
-                file << "\n";
-            }
-            file.close();
-
-        }
-
-        std:: vector < std::vector <double> > measured_values {2};   // vector of vectors, storing the measured observables in its rows.
-
-};
-
 
 
 #endif // SETUP_CLASSES_H

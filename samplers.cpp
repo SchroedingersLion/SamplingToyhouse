@@ -3,9 +3,9 @@
 
 // ##### ISAMPLER METHODS ##### //
 
-void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg, int n_tavg, const int n_dist){
-
-    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed.
+void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas){
+    
+    MPI_Init(&argc, &argv);				// initialize MPI, use rank as random seed
     MPI_Comm comm = MPI_COMM_WORLD;
     int rank, nr_proc;
     MPI_Comm_rank(comm, &rank);
@@ -13,65 +13,31 @@ void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IP
 
     const int seed = rank;
 
-    print_params();
-    measurement RESULTS = collect_samples(max_iter, POTCLASS, seed, t_meas);    // run sampler.
+    print_sampler_params();
+    collect_samples(max_iter, problem, RESULTS, seed, t_meas);    // run sampler
 
     std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
     MPI_Barrier(comm);
 
     // sum up results of different processors. 
-    measurement RESULTS_AVG;
     int row_size;
 
     for ( size_t i = 0;  i < RESULTS.measured_values.size();  ++i){
         
         row_size = RESULTS.measured_values[i].size();
-        if( rank==0 ) RESULTS_AVG.measured_values[i].resize( row_size );     // only on rank 0 to save RAM.
 
-        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS_AVG.measured_values[i][0], row_size, MPI_DOUBLE, MPI_SUM, 0, comm);
-
-    }	 
-
-    // compute average.
-    if( rank==0 ){
-
-        // average over processes.
-        std:: cout << "Average over processes..." << std:: endl;
-        for ( size_t i = 0;  i < RESULTS_AVG.measured_values.size();  ++i){
-            row_size = RESULTS_AVG.measured_values[i].size();
+        if( rank==0 ) RESULTS.measured_values_AVG[i].resize( row_size );     // only on rank 0 to save RAM.
+        MPI_Reduce( &RESULTS.measured_values[i][0], &RESULTS.measured_values_AVG[i][0], row_size, MPI_FLOAT, MPI_SUM, 0, comm);
+        
+        if( rank==0 ){
             for ( int j = 0;  j < row_size;  ++j ){
-                RESULTS_AVG.measured_values[i][j] /= nr_proc;
+                RESULTS.measured_values_AVG[i][j] /= nr_proc;
             }
         }
-        
-    // time average
-        if ( tavg == true ){
+    }	 
 
-            std:: cout << "Time averaging...\n";
-            int n_tavg_temp;
-            
-            for ( size_t row = 0;  row < RESULTS_AVG.measured_values.size();  ++row ){   // t-average one row at a time.
-            
-                n_tavg_temp = n_tavg;
-            
-                for ( int i = RESULTS_AVG.measured_values[row].size() - 1;  i >= 0;  i -= n_dist ){
-                
-                    if ( i <= n_tavg_temp - 1 ) n_tavg_temp = i;
-                    for ( int j = i - n_tavg_temp;  j < i;  ++j ){
-                        RESULTS_AVG.measured_values[row][i] += RESULTS_AVG.measured_values[row][j];
-
-                    }
-                    RESULTS_AVG.measured_values[row][i] /= (n_tavg_temp + 1);
-
-                }
-            }
-        
-        } // end time average.
-
-    }
-
-    if ( rank == 0) RESULTS_AVG.print_to_csv(t_meas, n_dist, outputfile);     // print to file, as specified by the user in the "measurement" class.
-
+    if ( rank == 0) RESULTS.print_to_csv(t_meas, outputfile);     // print to file, as specified by the user in the "measurement" class.
+   
     MPI_Finalize();
 
     return;
@@ -80,7 +46,8 @@ void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IP
 
 
 
-void ISAMPLER::print_params(){    // default behavior in case derived classes don't override.
+
+void ISAMPLER::print_sampler_params(){    // default behavior in case derived classes don't override.
 
     std::cout << "\n";
 
@@ -91,7 +58,7 @@ void ISAMPLER::print_params(){    // default behavior in case derived classes do
 
 // ##### OBABO METHODS ##### //
 
-void OBABO_sampler::print_params(){
+void OBABO_sampler::print_sampler_params(){
     
     std:: cout << "OBABO sampling with parameters:\n";
     std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
@@ -99,8 +66,7 @@ void OBABO_sampler::print_params(){
 };
 
 
-
-measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
+void OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // set integrator constants.
     const double a = exp(-1*gamma*h);    
@@ -114,8 +80,7 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
     problem.compute_force();
 
     // COMPUTE INITIAL MEASUREMENTS.
-    measurement RESULTS;
-    RESULTS.take_measurement(problem.parameters, problem.velocities);
+    RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);
 
     // PREPARE RNG.
     std:: mt19937 twister;
@@ -165,12 +130,12 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 		    Rn = normal(twister);
             problem.velocities[j] = sqrt_a * problem.velocities[j]  +  sqrt_aT * Rn;
         
-        }   								 
+        }   			
 
-        // TAKE MEASUREMENT.
-		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
-            RESULTS.take_measurement(problem.parameters, problem.velocities); 
-		}
+        // TAKE MEASUREMENT
+		if( i % t_meas == 0 ) {                                                      
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);    // take measurement any t_meas steps.   
+        }
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
 	
@@ -181,7 +146,7 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
         
-    return RESULTS;
+    return;
 
 };
 
@@ -191,7 +156,7 @@ measurement OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 
 // ##### SGHMC METHODS ##### //
 
-void SGHMC_sampler::print_params(){
+void SGHMC_sampler::print_sampler_params(){
     
     std:: cout << "SGHMC sampling with parameters:\n";
     std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
@@ -200,7 +165,7 @@ void SGHMC_sampler::print_params(){
 
 
 
-measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
+void SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // set integrator constants.
     const double one_minus_hgamma = 1-h*gamma;    
@@ -212,8 +177,7 @@ measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem
     problem.compute_force();
 
     // COMPUTE INITIAL MEASUREMENTS.
-    measurement RESULTS;
-    RESULTS.take_measurement(problem.parameters, problem.velocities);
+    RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);
 
     // PREPARE RNG.
     std:: mt19937 twister;
@@ -246,7 +210,7 @@ measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 
         // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
-            RESULTS.take_measurement(problem.parameters, problem.velocities); 
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces); 
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
@@ -259,7 +223,7 @@ measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
         
-    return RESULTS;
+    return;
 
 };
 
@@ -269,7 +233,7 @@ measurement SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem
 
 // ##### BBK_AMAGOLD METHODS ##### //
 
-void BBK_AMAGOLD_sampler::print_params(){
+void BBK_AMAGOLD_sampler::print_sampler_params(){
     
     std:: cout << "BBK (AMAGOLD version) sampling with parameters:\n";
     std:: cout << "Temperature = " << T << ",\nFriction = " << gamma << ",\nStepsize = " << h << ".\n" << std:: endl; 
@@ -278,7 +242,7 @@ void BBK_AMAGOLD_sampler::print_params(){
 
 
 
-measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem, const int randomseed, const int t_meas){
+void BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     std::cout<<"entering collect samples"<<std::endl;
 
@@ -293,8 +257,7 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
     problem.compute_force();
 
     // COMPUTE INITIAL MEASUREMENTS.
-    measurement RESULTS;
-    RESULTS.take_measurement(problem.parameters, problem.velocities);
+    RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);
 
     // PREPARE RNG.
     std:: mt19937 twister;
@@ -329,7 +292,7 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
 
         // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 // take measurement any t_meas steps.        
-            RESULTS.take_measurement(problem.parameters, problem.velocities); 
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces); 
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
@@ -342,6 +305,6 @@ measurement BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& p
 	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
 	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
         
-    return RESULTS;
+    return;
 
 };
