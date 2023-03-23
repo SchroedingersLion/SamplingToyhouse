@@ -14,7 +14,8 @@
 #include <limits>
 #include <numeric>
 #include <iterator>
-#include "setup_classes.h"
+#include "problems.h"
+#include "measurements.h"
 #include <mpi.h>
 
 
@@ -28,15 +29,15 @@ In particular, they need to implement the collect_samples routine.
     private:
 
         /* Draws a single sampling trajectory. Needs to be defined in child classes. */
-        virtual measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) = 0;     
+        virtual void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) = 0;     
 
 
     public:
 
         /* Sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging and prints to file. */
-        void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& POTCLASS, const std:: string outputfile, const int t_meas, const bool tavg=0, int n_tavg=10, const int n_dist=1);
+        void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas);
 
-        virtual void print_params();    // prints sampler hyperparameters, defined in child classes.
+        virtual void print_sampler_params();    // prints sampler hyperparameters, defined in child classes.
 
         virtual ~ISAMPLER(){};          // destructor.
 
@@ -57,7 +58,7 @@ The OBABO splitting scheme.
         const double gamma;  // friction.
         const double h;      // stepsize.
 
-        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override; 
+        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
 
 
     public:
@@ -66,7 +67,7 @@ The OBABO splitting scheme.
         OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {
         }; 
 
-        void print_params() override;  
+        void print_sampler_params() override;  
 
         ~OBABO_sampler(){};            // destructor.
 
@@ -88,7 +89,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;
+        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
    
    
     public:
@@ -96,7 +97,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
         SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // constructor.
         }
 
-        void print_params() override;
+        void print_sampler_params() override;
 
         ~SGHMC_sampler(){};              // destructor
 
@@ -116,7 +117,7 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020).
         const double gamma;
         const double h;
 
-        measurement collect_samples(const int max_iter, IPROBLEM& POTCLASS, const int randomseed, const int t_meas) override;
+        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
 
 
     public:
@@ -124,7 +125,7 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020).
         BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {           // consructor.
         }
 
-        void print_params() override;
+        void print_sampler_params() override;
 
         ~BBK_AMAGOLD_sampler(){};               // destructor.
 
