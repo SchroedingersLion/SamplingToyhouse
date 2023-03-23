@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]){
 
-    // we want to sample the double well potential using the OBABO sampler
+
 
     double T = 1;           // sampler hyperparameters
     double gamma = 20;
@@ -23,9 +23,10 @@ int main(int argc, char *argv[]){
     // const int batchsize = 5;
     // BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D problem(filename, batchsize);    /* construct object of the problem class defined by the user in header "setup_classes.h". */
     
-    HARMONIC_OSCILLATOR_1D problem;
+    // HARMONIC_OSCILLATOR_1D problem;
+    DOUBLE_GAUSSIAN_BASINS_2D problem;
 
-    MEASUREMENT_HO_1D RESULTS(n_dist);
+    MEASUREMENT_DEFAULT RESULTS(n_dist);
 
     std:: string outputfile = "RESULTS.csv";
 
