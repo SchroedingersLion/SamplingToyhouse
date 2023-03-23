@@ -101,7 +101,7 @@ It stores 3 observables: The first model parameter (i.e. the first position coor
 
     public:
         
-        // Construtcor. 
+        // Constructor. 
         /* 
         Note that it calls the interface class' constructor and passes 3 as input for "no_observables", determining the size of the vector "samples".
         This is somewhat unsafe as the number passed has to match the number of entries "samples" is expected to have in the "compute_sample" routine below.
