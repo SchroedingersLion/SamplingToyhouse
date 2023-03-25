@@ -65,6 +65,48 @@ This problem is the 1D harmonic oscillator with spring constant \omega^2.
 
 
 
+
+class CURVED_DOUBLE_WELL_2D: public IPROBLEM {
+/*
+This problem is a 2-dim double well where the wells are connected via a curved channel.
+It is defined by  U(x,y) = a(y-x^2)^2  +  x^2 (b-x)^2  with constants a,b >= 0.
+The minima lie at (0,0) and (b,b^2).
+*/
+
+    private:
+
+        const double a;
+        const double b;
+        const double min_two_a = -2*a;
+
+    public:
+
+        // Constructor.
+        CURVED_DOUBLE_WELL_2D(const double a=1, const double b=2, const std:: vector <double>& init_params = std:: vector <double> {0,0}, const std:: vector <double>& init_velocities = std:: vector <double> {0,0})
+        : IPROBLEM(init_params, init_velocities), a{a}, b{b} {
+        }
+
+        void compute_force() override {              
+                                                               
+            double x = parameters[0];       // Current parameters (positions).
+            double y = parameters[1];
+
+            double y_min_x2 = y - x*x;      // Some help constants.
+            double b_min_x = b-x;
+
+
+            forces[0] = -2*x * ( min_two_a * y_min_x2  -  x * b_min_x  +  b_min_x * b_min_x );
+            forces[1] = min_two_a * y_min_x2;
+            
+            return;
+
+        };
+
+};
+
+
+
+
 class DOUBLE_GAUSSIAN_BASINS_2D: public IPROBLEM { 
 /*
 This problem is a 2D double well where the basins are of Gaussian shape. The minima lie at (-1,0) and (1,0).

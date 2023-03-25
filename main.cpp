@@ -12,14 +12,14 @@ int main(int argc, char *argv[]){
     int iter = 100000;       // Number of iteration (sampler steps).
     int t_meas = 1;          // Take measurement and use it for on-the-fly time-average every t_meas iterations.
     int n_dist = 1000;       // Store and print-out any n_dist taken measurement. 
-    bool t_avg = false;
+    bool t_avg = true;
 
     // ### CONSTRUCT ONE OF THE SAMPLERS DEFINED IN "samplers.h". ### //
-    BAOAB_sampler testsampler(T, gamma, h);    
+    OBABO_sampler testsampler(T, gamma, h);    
 
     
     // ### CONSTRUCT THE PROBLEM TO BE SAMPLED ON, DEFINED IN "problems.h". ### //
-    HARMONIC_OSCILLATOR_1D testproblem;
+    CURVED_DOUBLE_WELL_2D testproblem;
 
     
     // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
