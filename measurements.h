@@ -23,9 +23,9 @@ In particular, they need to implement the compute_sample routine.
         no_observables gives the number of observables the measuremement object is going to collect (eg. = 2 if one only wants to store kinetic and configurational temperature). 
         n_dist gives the frequency by which measurements are printed out to file (eg. if n_dist = 5, any 5th taken sample will be printed).
         */
-        IMEASUREMENT(const size_t no_observables, const size_t n_dist)                         
+        IMEASUREMENT(const size_t no_observables, const size_t n_dist, const bool time_average = true)                         
             : measured_values{std:: vector < std::vector <float> > {no_observables}}, measured_values_AVG{std:: vector < std::vector <float> > {no_observables}}, 
-              summed_values{std:: vector <double> (no_observables,0)}, samples{std:: vector <double> (no_observables,0)}, ctr{0}, n_dist{n_dist} {};  
+              summed_values{std:: vector <double> (no_observables,0)}, samples{std:: vector <double> (no_observables,0)}, ctr{0}, n_dist{n_dist}, time_average{time_average} {};  
 
 
 
@@ -39,18 +39,38 @@ In particular, they need to implement the compute_sample routine.
         */
         void take_measurement(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces){
 
-            compute_sample(parameters, velocities, forces);
+            if ( time_average == true ){
 
-            for (size_t i = 0;  i < summed_values.size();  ++i){
-                summed_values[i] += samples[i];
+                compute_sample(parameters, velocities, forces);             // Compute samples...
+
+                for (size_t i = 0;  i < summed_values.size();  ++i){        // ...add them to sum for t-average...
+                    summed_values[i] += samples[i];
+                }
+
+                if ( ctr % n_dist == 0 ){                                   // ...but only perform average and store them for print-out 
+                                                                            //     any n_dist taken measurements.
+                    
+                    for (size_t i = 0;  i < summed_values.size();  ++i){
+                        measured_values[i].push_back(summed_values[i] / (ctr+1));
+                    }
+                
+                }
+
             }
 
-            if ( ctr % n_dist == 0 ){
-                
-                for (size_t i = 0;  i < summed_values.size();  ++i){
-                    measured_values[i].push_back(summed_values[i] / (ctr+1));
+            else {                                                              // No t-average...
+
+                if ( ctr % n_dist == 0 ){
+
+                    compute_sample(parameters, velocities, forces);             // ...so only compute samples when they are
+                                                                                // going to be printed out later.
+                    
+                    for (size_t i = 0;  i < samples.size();  ++i){
+                        measured_values[i].push_back(samples[i]);
+                    }
+                    
                 }
-                
+
             }
 
             ++ctr;
@@ -88,6 +108,7 @@ In particular, they need to implement the compute_sample routine.
         const size_t n_dist;                                        // Any n_dist taken measurements will be stored and printed out by print-out routine.
         std:: vector <double> summed_values;                        // Help vector to add taken measurements for time-average.
         std:: vector <double> samples;                              // Vector storing the observables computed from a single set of model parameters at a given time (positions, velocities, forces).
+        bool time_average;                                          // Decides whether measurements are time-averaged.
 
 };
 
@@ -108,8 +129,8 @@ It stores 3 observables: The first model parameter (i.e. the first position coor
         It needs to be changed in the future.
         */ 
 
-        MEASUREMENT_DEFAULT(const size_t n_dist)
-            : IMEASUREMENT(3, n_dist) {};
+        MEASUREMENT_DEFAULT(const size_t n_dist, const bool t_avg = true)
+            : IMEASUREMENT(3, n_dist, t_avg) {};
         
         
         void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override {  

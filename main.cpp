@@ -5,14 +5,14 @@
 int main(int argc, char *argv[]){
 
 
-    double T = 1;           // Sampler hyperparameters
+    double T = 1;           // Sampler hyperparameters.
     double gamma = 20;
     double h = 0.01;
 
     int iter = 100000;       // Number of iteration (sampler steps).
     int t_meas = 1;          // Take measurement and use it for on-the-fly time-average every t_meas iterations.
     int n_dist = 1000;       // Store and print-out any n_dist taken measurement. 
-
+    bool t_avg = false;
 
     // ### CONSTRUCT ONE OF THE SAMPLERS DEFINED IN "samplers.h". ### //
     BAOAB_sampler testsampler(T, gamma, h);    
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 
     
     // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
-    MEASUREMENT_DEFAULT RESULTS(n_dist);
+    MEASUREMENT_DEFAULT RESULTS(n_dist, t_avg);
 
     std:: string outputfile = "RESULTS.csv";  // Name of output file.
 
