@@ -19,11 +19,11 @@ int main(int argc, char *argv[]){
 
     
     // ### CONSTRUCT THE PROBLEM TO BE SAMPLED ON, DEFINED IN "problems.h". ### //
-    CURVED_DOUBLE_WELL_2D testproblem;
+    HARMONIC_OSCILLATOR_1D testproblem;
 
     
     // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
-    MEASUREMENT_DEFAULT RESULTS(n_dist, t_avg);
+    MEASUREMENT_HO_1D RESULTS(n_dist, t_avg);
 
     std:: string outputfile = "RESULTS.csv";  // Name of output file.
 

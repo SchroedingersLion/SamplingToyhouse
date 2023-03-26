@@ -153,8 +153,8 @@ It collects the same observables as in Leimkuhler & Matthews 2013, i.e. q^2, p^2
 
     public:
 
-        MEASUREMENT_HO_1D(const size_t n_dist)
-            : IMEASUREMENT(3, n_dist) {};
+        MEASUREMENT_HO_1D(const size_t n_dist, const bool t_avg = true)
+            : IMEASUREMENT(3, n_dist, t_avg) {};
 
         void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override {  
                                                                                                                    
@@ -175,8 +175,8 @@ Measurement class useful for 2-dimensional problems. It collects the two coordin
 
     public:
 
-        MEASUREMENT_2D(const size_t n_dist)
-            : IMEASUREMENT(4, n_dist) {};
+        MEASUREMENT_2D(const size_t n_dist, const bool t_avg = true)
+            : IMEASUREMENT(4, n_dist, t_avg) {};
 
         void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override {  
                                                                                                                    
