@@ -135,7 +135,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
 
 class BBK_AMAGOLD_sampler: public ISAMPLER{
 /*
-The BBK scheme used in the AMAGOLD method (Zhang et al., 2020).
+The BBK scheme used in the AMAGOLD method (Zhang et al., 2020). Note that it does not use Metropolization.
 */
 
     private:
