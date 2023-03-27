@@ -14,7 +14,7 @@ void ISAMPLER::run_mpi_simulation(int argc, char *argv[], const int max_iter, IP
     const int seed = rank;
 
     print_sampler_params();
-    collect_samples(max_iter, problem, RESULTS, seed, t_meas);    // Run sampler.
+    draw_trajectory(max_iter, problem, RESULTS, seed, t_meas);    // Run sampler.
 
     std:: cout << "Rank " << rank << " reached barrier." << std:: endl;
     MPI_Barrier(comm);
@@ -67,7 +67,7 @@ void OBABO_sampler::print_sampler_params(){
 };
 
 
-void OBABO_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
+void OBABO_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // Integrator constants.
     const double a = exp(-1*gamma*h);    
@@ -163,7 +163,7 @@ void BAOAB_sampler::print_sampler_params(){
 };
 
 
-void BAOAB_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
+void BAOAB_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // Integrator constants.
     const double a = exp(-1*gamma*h);    
@@ -266,7 +266,7 @@ void SGHMC_sampler::print_sampler_params(){
 
 
 
-void SGHMC_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
+void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // Integrator constants.
     const double one_minus_hgamma = 1-h*gamma;    
@@ -343,7 +343,7 @@ void BBK_AMAGOLD_sampler::print_sampler_params(){
 
 
 
-void BBK_AMAGOLD_sampler::collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
+void BBK_AMAGOLD_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     std::cout<<"entering collect samples"<<std::endl;
 

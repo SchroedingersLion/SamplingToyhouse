@@ -29,7 +29,7 @@ In particular, they need to implement the collect_samples routine.
     private:
 
         /* Draws a single sampling trajectory. Needs to be defined in child classes. */
-        virtual void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) = 0;     
+        virtual void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) = 0;     
 
 
     public:
@@ -58,7 +58,7 @@ The OBABO splitting scheme.
         const double gamma;  // Friction.
         const double h;      // Stepsize.
 
-        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
 
 
     public:
@@ -86,7 +86,7 @@ The BAOAB splitting scheme.
         const double gamma;  // Friction.
         const double h;      // Stepsize.
 
-        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
 
 
     public:
@@ -116,7 +116,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
         const double gamma;
         const double h;
 
-        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
    
    
     public:
@@ -144,7 +144,7 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020). Note that it doe
         const double gamma;
         const double h;
 
-        void collect_samples(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
 
 
     public:
