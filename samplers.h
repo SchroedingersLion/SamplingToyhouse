@@ -118,7 +118,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
     public:
 
         SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
-        }
+        };
 
         void print_sampler_params() override;
 
@@ -144,7 +144,7 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020). Note that it doe
     public:
 
         BBK_AMAGOLD_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {           // Consructor.
-        }
+        };
 
         void print_sampler_params() override;
 

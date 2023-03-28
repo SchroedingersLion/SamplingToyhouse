@@ -51,7 +51,7 @@ This problem is the 1D harmonic oscillator with spring constant \omega^2.
         // Constructor.
         HARMONIC_OSCILLATOR_1D(const double omega_squared = 25, const std:: vector <double>& init_params = std:: vector <double> {0}, const std:: vector <double>& init_velocities = std:: vector <double> {0})
         : IPROBLEM(init_params, init_velocities), omega_sq{omega_squared} {
-        }
+        };
 
         void compute_force() override {              
                                                                
@@ -84,7 +84,7 @@ The minima lie at (0,0) and (b,b^2).
         // Constructor.
         CURVED_DOUBLE_WELL_2D(const double a=1, const double b=2, const std:: vector <double>& init_params = std:: vector <double> {0,0}, const std:: vector <double>& init_velocities = std:: vector <double> {0,0})
         : IPROBLEM(init_params, init_velocities), a{a}, b{b} {
-        }
+        };
 
         void compute_force() override {              
                                                                
