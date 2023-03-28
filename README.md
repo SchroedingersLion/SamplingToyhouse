@@ -247,8 +247,8 @@ it only stores every `n_dist` taken observable set to the result vector `measure
 process-averaged and printed to a file by the samplers at the end of the simulation. In other words, if one wanted to have an output file holding 
 trajectory data for every 1000th sampler step, one needs to pick `t_meas` and `n_dist` such that 1000= `t_meas` x `n_dist`.  
 
-The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem. Its implementation of `compute_sample` collects the first position coordinate, the kinetic temperature $T_{kin}=\frac{1}{N_{d}}p\cdot p$,  
-and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as samples, where $N_d$ is the number of degrees of freedom. 
+The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem. Its implementation of `compute_sample` collects the first position coordinate, the kinetic temperature  
+$T_{kin}=\frac{1}{N_{d}}p\cdot p$, and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as samples, where $N_d$ is the number of degrees of freedom.  
 Its implementation is displayed in the next section as an example to create measurement classes derived from `IMEASUREMENT`.
 
 ### The Sampler Library
@@ -297,10 +297,10 @@ In order to use the SamplingToyhouse, we need to download the following files fr
 **measurements.h**, **problems.h** to a common folder.  
 Rather than manually downloading, we could also clone the whole respository, which will be the method of choice if we want to contribute to the project 
 in the long run.  
+
 After adjusting the main file (which includes the two header files), the code needs to be compiled via the MPI compiler wrapper provided by the 
-respective MPI library being used on the system. On a Linux machine using the _OpenMPI_ library and the _GCC_ compiler, the compilation is invoked via  
-`mpicxx -O3 -o main.exe main.cpp samplers.cpp`. This will create an executable called **main.exe** which can be run via `mpirun -n N main.exe`, where
-N needs to be replaced by the number of MPI processes that are supposed to be launched. Each process will draw a single trajectory.
+respective MPI library being used on the system. On a Linux machine using the _OpenMPI_ library and the _GCC_ compiler, the compilation is invoked via 
+`mpicxx -O3 -o main.exe main.cpp samplers.cpp`. This will create an executable called **main.exe** which can be run via `mpirun -n N main.exe`, where N needs to be replaced by the number of MPI processes that are supposed to be launched. Each process will draw a single trajectory.
 
 ### With predefined samplers, problems, and measurement objects
 In the simplest case, a user might want to sample one of the problems that are already implemented in the problem library, using a sampler that 
