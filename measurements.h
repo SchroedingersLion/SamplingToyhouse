@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <cmath>
 
 
 class IMEASUREMENT{
