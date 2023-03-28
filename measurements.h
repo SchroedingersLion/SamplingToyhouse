@@ -79,7 +79,10 @@ In particular, they need to implement the compute_sample routine.
         };
 
 
-        /* Method to print out the time-and process-averaged results. It should be called by the user in main() after running the simulation. */
+        /* 
+        Method to print out the time-and process-averaged results. 
+        Called by the samplers at the end of the simulation.
+        */
         void print_to_csv(const int t_meas, const std:: string outputname){    
 
             std:: ofstream file{outputname};
