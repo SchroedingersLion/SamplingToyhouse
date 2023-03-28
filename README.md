@@ -111,7 +111,6 @@ In particular, they need to implement the compute_sample routine.
 */
 
     public:
-
         
         /*
 	Constructor.
@@ -127,7 +126,6 @@ In particular, they need to implement the compute_sample routine.
 	      samples{std:: vector <double> (no_observables,0)}, ctr{0}, n_dist{n_dist}, 
 	      time_average{time_average} 
 	      {};  
-
 
 
         /* 
@@ -249,39 +247,9 @@ it only stores every `n_dist` taken observable set to the result vector `measure
 process-averaged and printed to a file by the samplers at the end of the simulation. In other words, if one wanted to have an output file holding 
 trajectory data for every 1000th sampler step, one needs to pick `t_meas` and `n_dist` such that 1000= `t_meas` x `n_dist`.  
 
-The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem: 
-```C++
-class MEASUREMENT_DEFAULT: public IMEASUREMENT{
-/* 
-This is a default measurement class. It can be used with any model/problem. 
-It stores 3 observables: The first model parameter (i.e. the first position coordinate), the kinetic, and the configurational temperature given by Force \cdot Position.
-*/
-
-    public:
-        
-        // Constructor. 
-        /* 
-        Note that it calls the interface class' constructor and passes 3 as input for "no_observables", determining the size of the vector "samples".
-        This is somewhat unsafe, as the number passed has to match the number of entries "samples" is expected to have in the "compute_sample" routine below.
-        It needs to be changed in the future.
-        */ 
-
-        MEASUREMENT_DEFAULT(const size_t n_dist, const bool t_avg = true)
-            : IMEASUREMENT(3, n_dist, t_avg) {};
-        
-        
-        void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override {  
-
-            samples[0] = parameters[0];
-            samples[1] = 1./parameters.size() * (velocities[0]*velocities[0] + velocities[1]*velocities[1]);
-            samples[2] = - 1./parameters.size() * (parameters[0]*forces[0] + parameters[1]*forces[1]); 
-        
-        };
-
-};
-```
-Its implementation of `compute_sample` collects the first position coordinate, the kinetic temperature $T_{kin}=\frac{1}{N_{d}}p\cdot p$,  
-and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as samples, where $N_d$ is the number of degrees of freedom.
+The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem. Its implementation of `compute_sample` collects the first position coordinate, the kinetic temperature $T_{kin}=\frac{1}{N_{d}}p\cdot p$,  
+and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as samples, where $N_d$ is the number of degrees of freedom. 
+Its implementation is displayed in the next section as an example to create measurement classes derived from `IMEASUREMENT`.
 
 ### The Sampler Library
 The sampler library holds the various sampling schemes. It consists of two files: **samplers.h**, which gives the class definitions of the samplers, 
@@ -298,13 +266,18 @@ In particular, they need to implement the collect_samples routine.
     private:
 
         /* Draws a single sampling trajectory. Needs to be defined in child classes. */
-        virtual void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) = 0;     
+        virtual void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, 
+				     const int randomseed, const int t_meas) = 0;     
 
 
     public:
 
-        /* Sets up mpi environment and calls "collect_samples" on each process within. Also performs averaging and prints to file. */
-        void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas);
+        /* 
+	Sets up mpi environment and calls "collect_samples" on each process within. 
+	Also performs averaging and prints to file. 
+	*/
+        void run_mpi_simulation(int argc, char *argv[], const int max_iter, IPROBLEM& problem, 
+				IMEASUREMENT& RESULTS, const std:: string outputfile, const int t_meas);
 
         virtual void print_sampler_params();    // Prints sampler hyperparameters, defined in child classes.
 
@@ -355,24 +328,19 @@ int main(int argc, char *argv[]){
     // ### CONSTRUCT ONE OF THE SAMPLERS DEFINED IN "samplers.h". ### //
     OBABO_sampler testsampler(T, gamma, h);    
 
-    
     // ### CONSTRUCT THE PROBLEM TO BE SAMPLED ON, DEFINED IN "problems.h". ### //
     HARMONIC_OSCILLATOR_1D testproblem;
-    
     
     // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
     MEASUREMENT_DEFAULT RESULTS(n_dist, t_avg);
 
     std:: string outputfile = "RESULTS.csv";  // Name of output file.
 
-
     // ### RUN SAMPLER. ### //
     testsampler.run_mpi_simulation(argc, argv, iter, testproblem, RESULTS, outputfile, t_meas);          
 
-
-
+   
     return 0;
-
 
 }
 ```
@@ -427,23 +395,25 @@ of the measurement interface class `IMEASUREMENT` that all measurement classes m
 class MEASUREMENT_DEFAULT: public IMEASUREMENT{
 /* 
 This is a default measurement class. It can be used with any model/problem. 
-It stores 3 observables: The first model parameter (i.e. the first position coordinate), the kinetic, and the configurational temperature given by Force \cdot Position.
+It stores 3 observables: The first model parameter (i.e. the first position coordinate), 
+the kinetic, and the configurational temperature given by Force \cdot Position.
 */
 
     public:
         
-        // Constructor. 
         /* 
-        Note that it calls the interface class' constructor and passes 3 as input for "no_observables", determining the size of the vector "samples".
-        This is somewhat unsafe, as the number passed has to match the number of entries "samples" is expected to have in the "compute_sample" routine below.
+	Constructor. 
+        Note that it calls the interface class' constructor and passes 3 as input for "no_observables", 
+	determining the size of the vector "samples". This is somewhat unsafe, as the number passed has to 
+	match the number of entries "samples" is expected to have in the "compute_sample" routine below.
         It needs to be changed in the future.
         */ 
-
         MEASUREMENT_DEFAULT(const size_t n_dist, const bool t_avg = true)
             : IMEASUREMENT(3, n_dist, t_avg) {};
         
         
-        void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override {  
+        void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, 
+			    const std:: vector <double>& forces) override {  
 
             samples[0] = parameters[0];
             samples[1] = 1./parameters.size() * (velocities[0]*velocities[0] + velocities[1]*velocities[1]);
@@ -473,12 +443,12 @@ class our_new_measurement: public IMEASUREMENT{
            : IMEASUREMENT(2, n_dist, t_avg) {};
         
         
-       void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) override        {  
+       void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, 
+       			   const std:: vector <double>& forces) override  {  
 
            samples[0] = pow(parameters[0],3);
            samples[1] = sin( velocities[0] + velocities[1] );
-
-        
+  
        };
 
 };
@@ -501,9 +471,11 @@ This problem is the 1D harmonic oscillator with spring constant \omega^2.
     public:
 
         // Constructor.
-        HARMONIC_OSCILLATOR_1D(const double omega_squared = 25, const std:: vector <double>& init_params = std:: vector <double> {0}, const std:: vector <double>& init_velocities = std:: vector <double> {0})
+        HARMONIC_OSCILLATOR_1D(const double omega_squared = 25, 
+			       const std:: vector <double>& init_params = std:: vector <double> {0}, 
+			       const std:: vector <double>& init_velocities = std:: vector <double> {0})
         : IPROBLEM(init_params, init_velocities), omega_sq{omega_squared} {
-        }
+        };
 
         void compute_force() override {              
                                                                
@@ -532,9 +504,11 @@ The minima lie at (0,0) and (b,b^2).
     public:
 
         // Constructor.
-        CURVED_DOUBLE_WELL_2D(const double a=1, const double b=2, const std:: vector <double>& init_params = std:: vector <double> {0,0}, const std:: vector <double>& init_velocities = std:: vector <double> {0,0})
+        CURVED_DOUBLE_WELL_2D(const double a=1, const double b=2, 
+			      const std:: vector <double>& init_params = std:: vector <double> {0,0}, 
+			      const std:: vector <double>& init_velocities = std:: vector <double> {0,0})
         : IPROBLEM(init_params, init_velocities), a{a}, b{b} {
-        }
+        };
 
         void compute_force() override {              
                                                                
@@ -592,12 +566,13 @@ The OBABO splitting scheme.
         const double gamma;  // Friction.
         const double h;      // Stepsize.
 
-        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override; 
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, 
+			     const int randomseed, const int t_meas) override; 
 
 
     public:
 
-        OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
+        OBABO_sampler(const double T, const double gamma, const double h): T{T}, gamma{gamma}, h{h} {     // Constructor.
         }; 
 
         void print_sampler_params() override;  
@@ -610,7 +585,8 @@ The OBABO splitting scheme.
 class SGHMC_sampler: public ISAMPLER{
 /*
 The SGHMC sampler (Chen et al. 2014).
-Note that whether stochastic gradients are actually used depends on the force routine specified in the problem class passed as an argument.
+Note that whether stochastic gradients are actually used depends on the force routine specified in the 
+problem class passed as an argument.
 */
 
     private:
@@ -619,13 +595,14 @@ Note that whether stochastic gradients are actually used depends on the force ro
         const double gamma;
         const double h;
 
-        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas) override;
+        void draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, 
+			     const int randomseed, const int t_meas) override;
    
    
     public:
 
         SGHMC_sampler(double T, double gamma, double h): T{T}, gamma{gamma}, h{h} {        // Constructor.
-        }
+        };
 
         void print_sampler_params() override;
 
@@ -637,7 +614,8 @@ The member variables temperature `T`, friction `gamma`, and step size `h` are us
 
 Having added the class of our new scheme to the header file, we can move on to define how the scheme is going to collect samples, i.e. we need to write the function `draw_trajectory` in the source file **samplers.cpp**. The case of the `SGHMC_sampler` serves again as an example: 
 ```C++
-void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
+void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, 
+				    const int randomseed, const int t_meas){
 
     // Integrator constants.
     const double one_minus_hgamma = 1-h*gamma;    
@@ -670,9 +648,12 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
         // UPDATE.
         for ( size_t j = 0;  j < No_params;  ++j ) {                  
             
+	    // Momentum update.
             Rn = normal(twister);
-            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; // Momentum update.
-            problem.parameters[j] += h * problem.velocities[j];                                                             // Parameter update.
+            problem.velocities[j] = one_minus_hgamma * problem.velocities[j]  +  noise_pref * Rn  +  h * problem.forces[j]; 
+            
+	    // Parameter update.
+	    problem.parameters[j] += h * problem.velocities[j];                                                            
         
         }
   
@@ -682,7 +663,7 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
 
         // TAKE MEASUREMENT.
 		if( i % t_meas == 0 ) {                                                 
-            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);   // Take measurement any t_meas steps.        
+            		RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);        
 		}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
