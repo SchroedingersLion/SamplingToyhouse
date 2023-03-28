@@ -68,7 +68,7 @@ their own elements to the system, eg. if they want to add new sampling schemes.
 ### The Problem Library
 The problem library is given by the header file **problems.h**. It holds the sampling problems, each of which is defined as an individual class inheriting 
 from an abstract parent class named `IPROBLEM`. The latter's definition can be found in the file: 
-```
+```C++
 class IPROBLEM {
 /* 
 The interface class of the problems to sample on (eg. double wells, harmonic oscillators, ...).
@@ -102,7 +102,7 @@ problem from this interface class in the next section.
 The measurement library is given by the header file **measurements.h**. The classes in this file specify different measurement processes, 
 in particular which observables to collect on a given sampling problem.  
 All measurement classes are derived from an abstract parent class `IMEASUREMENT`. The latter's definition can be found in the file:
-```
+```C++
 class IMEASUREMENT{
 /*
 This is the interface class of the measurements.
@@ -112,26 +112,39 @@ In particular, they need to implement the compute_sample routine.
 
     public:
 
-        // Constructor.
-        /* 
-        no_observables gives the number of observables the measuremement object is going to collect (eg. = 2 if one only wants to store kinetic and configurational temperature). 
-        n_dist gives the frequency by which measurements are printed out to file (eg. if n_dist = 5, any 5th taken sample will be printed).
+        
+        /*
+	Constructor.
+        no_observables gives the number of observables the measuremement object is going to collect 
+	(eg. = 2 if one only wants to store kinetic and configurational temperature). 
+        n_dist gives the frequency by which measurements are printed out to file 
+	(eg. if n_dist = 5, any 5th taken sample will be printed).
         */
         IMEASUREMENT(const size_t no_observables, const size_t n_dist, const bool time_average = true)                         
-            : measured_values{std:: vector < std::vector <float> > {no_observables}}, measured_values_AVG{std:: vector < std::vector <float> > {no_observables}}, 
-              summed_values{std:: vector <double> (no_observables,0)}, samples{std:: vector <double> (no_observables,0)}, ctr{0}, n_dist{n_dist}, time_average{time_average} {};  
+            : measured_values{std:: vector < std::vector <float> > {no_observables}}, 
+	      measured_values_AVG{std:: vector < std::vector <float> > {no_observables}}, 
+              summed_values{std:: vector <double> (no_observables,0)}, 
+	      samples{std:: vector <double> (no_observables,0)}, ctr{0}, n_dist{n_dist}, 
+	      time_average{time_average} 
+	      {};  
 
 
 
-        /* Needs to be overridden by child classes. Computes observables from given positions, velocities, and forces, and stores them in samples vector (see examples below). */
-        virtual void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces) = 0;
+        /* 
+	Needs to be overridden by child classes. Computes observables from given positions, velocities, and forces, 
+	and stores them in samples vector (see examples below). 
+	*/
+        virtual void compute_sample(const std:: vector <double>& parameters, const std:: vector <double>& velocities, 
+				    const std:: vector <double>& forces) = 0;
 
 
         /*
-        Method called by the samplers to take a measurement. It calls the user specified compute_sample routine to obtain oversables, performs the time-average, 
-        and stores any n_dist results in the measured_values vector for future print to file. 
+        Method called by the samplers to take a measurement. It calls the user specified compute_sample routine 
+	to obtain obersables, performs the time-average, and stores any n_dist results in the 
+	measured_values vector for future print to file. 
         */
-        void take_measurement(const std:: vector <double>& parameters, const std:: vector <double>& velocities, const std:: vector <double>& forces){
+        void take_measurement(const std:: vector <double>& parameters, const std:: vector <double>& velocities, 
+			     const std:: vector <double>& forces){
 
             if ( time_average == true ){
 
@@ -142,7 +155,7 @@ In particular, they need to implement the compute_sample routine.
                 }
 
                 if ( ctr % n_dist == 0 ){                                   // ...but only perform average and store them for print-out 
-                                                                            //     any n_dist taken measurements.
+                                                                            //    any n_dist taken measurements.
                     
                     for (size_t i = 0;  i < summed_values.size();  ++i){
                         measured_values[i].push_back(summed_values[i] / (ctr+1));
@@ -152,12 +165,12 @@ In particular, they need to implement the compute_sample routine.
 
             }
 
-            else {                                                              // No t-average...
+            else {                                                         // No t-average...
 
                 if ( ctr % n_dist == 0 ){
 
-                    compute_sample(parameters, velocities, forces);             // ...so only compute samples when they are
-                                                                                // going to be printed out later.
+                    compute_sample(parameters, velocities, forces);        // ...so only compute samples when 
+		    							   // they are  going to be printed out later.
                     
                     for (size_t i = 0;  i < samples.size();  ++i){
                         measured_values[i].push_back(samples[i]);
@@ -172,7 +185,10 @@ In particular, they need to implement the compute_sample routine.
         };
 
 
-        /* Method to print out the time-and process-averaged results. It should be called by the user in main() after running the simulation. */
+        /* 
+	Method to print out the time-and process-averaged results. 
+	Called by the samplers at the end of the simulation.
+ 	*/
         void print_to_csv(const int t_meas, const std:: string outputname){    
 
             std:: ofstream file{outputname};
@@ -195,14 +211,26 @@ In particular, they need to implement the compute_sample routine.
         virtual ~IMEASUREMENT(){};                      // Destructor.
 
 
+        // 2D vector, storing the measured (and t-averaged) observables in its rows.
+        std:: vector < std::vector <float> > measured_values;       
         
-        std:: vector < std::vector <float> > measured_values;       // 2D vector, storing the measured (and t-averaged) observables in its rows.
-        std:: vector < std::vector <float> > measured_values_AVG;   // 2D vector, storing the t- and process-averaged observables in its rows.
-        int ctr{0};                                                 // Help variable to count the number of measurements taken.
-        const size_t n_dist;                                        // Any n_dist taken measurements will be stored and printed out by print-out routine.
-        std:: vector <double> summed_values;                        // Help vector to add taken measurements for time-average.
-        std:: vector <double> samples;                              // Vector storing the observables computed from a single set of model parameters at a given time (positions, velocities, forces).
-        bool time_average;                                          // Decides whether measurements are time-averaged.
+	// 2D vector, storing the t- and process-averaged observables in its rows.
+	std:: vector < std::vector <float> > measured_values_AVG;  
+        
+	// Help variable to count the number of measurements taken.
+	int ctr{0};                                                 
+        
+	// Any n_dist taken measurements will be stored and printed out by print-out routine.
+	const size_t n_dist;                                        
+        
+	// Help vector to add taken measurements for time-average.
+	std:: vector <double> summed_values;                        
+        
+	/* Stores the observables computed from a single set of model parameters 
+	at a given time (positions, velocities, forces). */
+	std:: vector <double> samples;                              
+        
+	bool time_average;    // Decides whether measurements are time-averaged.
 
 };
 ```
@@ -222,7 +250,7 @@ process-averaged and printed to a file by the samplers at the end of the simulat
 trajectory data for every 1000th sampler step, one needs to pick `t_meas` and `n_dist` such that 1000= `t_meas` x `n_dist`.  
 
 The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem: 
-```
+```C++
 class MEASUREMENT_DEFAULT: public IMEASUREMENT{
 /* 
 This is a default measurement class. It can be used with any model/problem. 
@@ -259,7 +287,7 @@ and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as sampl
 The sampler library holds the various sampling schemes. It consists of two files: **samplers.h**, which gives the class definitions of the samplers, 
 and **samplers.cpp**, which holds the implementation of the member functions. All samplers are classes directly derived from an interface parent class 
 called `ISAMPLER`. Its definition is found in the header file: 
-```
+```C++
 class ISAMPLER{
 /*
 This is the interface class of the sampling schemes.
@@ -307,7 +335,7 @@ is already implemented in the sampler library. If he is also happy with the obse
 implemented, all he has to do is to write up a main file which loads and initializes the corresponding objects from the libraries, and call the 
 `run_mpi_simulation` routine.  
 An example main file for sampling from the 1-dimensional harmonic oscillator using the OBABO splitting scheme could look as follows: 
-```
+```C++
 #include "samplers.h"
 #include "problems.h"
 #include "measurements.h"
@@ -351,12 +379,18 @@ int main(int argc, char *argv[]){
 In this situation, the user was happy to use the default measurement class, which uses the first (and in the 1D-case only) position coordinate as well 
 as the kinetic and configurational temperature as observables, and saves the results to a file named **RESULTS.csv**. The Boolean `time_average` is set
 to `false`, meaning that no time-average is taken. Running the code via `mpirun -n 1 main.exe` draws a single sampling trajectory. Using a simple 
-python script, we plot the results: PLOT 
+python script, we plot the results:  
 
+![HO_demo_single](https://user-images.githubusercontent.com/70909827/228239263-b2089ae9-3b68-42ea-a2b1-700c742ae102.png)
 We see wild oscillations (pun intended) in the observables coming from the fact that we did not use any kind of averaging.  
-Rerunning the code with 100 processes will lead to an average over 100 different trajectories, generating the following results: PLOT
+Rerunning the code with 100 processes will lead to an average over 100 different trajectories, generating the following results:  
+
+![HO_demo_100traj](https://user-images.githubusercontent.com/70909827/228239583-c03f90a4-f8a1-48b1-9db4-7278f224b58a.png)
 The observables start to converge to the expected values (0 for the x-coordinate, 1 for the two temperatures). If we now switch on the time average by 
-setting `time_average` to `true` (don't forget to recompile!) we can improve the results even further: PLOT
+setting `time_average` to `true` (don't forget to recompile!) we can improve the results even further:  
+
+![HO_demo_100traj_time](https://user-images.githubusercontent.com/70909827/228239644-0d441d5b-9015-41bc-b0d2-76bd2be6a4d9.png)
+
 
 At this point, the input parameters passed to the constructors of the samplers, the measurement objects, and the problems will need to be inferred by 
 the user from looking at their respective definitions in the header files (later, a documentation for each sampler, problem, and measurement class will 
@@ -370,13 +404,14 @@ components are known but the means are not. It specifies the posterior density o
 In order to use that problem, simply declaring `BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D testproblem;` would not work, because the constructor 
 requires a file name (to read in the data set) as well as a batch size (as it offers the option of using subsampled gradients).  
 Instead, assuming the data set was stored in a file named **FILENAME.csv**, one would create the object as 
-```
+```C++
 string filename = "FILENAME.csv";
 int batchsize = 20;
 BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D testproblem(filename, batchsize); 
 ```
 Note that the `run_mpi_simulation` routine always takes in the same parameters, independently of the sampler, as it is a member function of the sampler 
 interface class (see the previous section). 
+
 
 **Exercise:** Draw samples on the predefined 2-dimensional double well problem with Gaussian basins, using the SGHMC method. You can use the default 
 measurement class again. The sampler parameters given in the code snippet above should work here as well. Plot the results to check whether the 
@@ -388,7 +423,7 @@ Assume that we are happy with the samplers and problems that are already impleme
 by any of the implemented measurement classes. In this scenario we will have to create our own measurement class. This comes down to editing the 
 **measurements.h** file accordingly. To see what we have to do, we take the default measurement class as a model, which is just one of the child classes 
 of the measurement interface class `IMEASUREMENT` that all measurement classes must be derived from. 
-```
+```C++
 class MEASUREMENT_DEFAULT: public IMEASUREMENT{
 /* 
 This is a default measurement class. It can be used with any model/problem. 
@@ -429,7 +464,7 @@ the first two lines needs to be changed to correspond to the observables we want
 take its third power. And instead of the kinetic temperature, we want to take the sine of the sum of the first two velocity components (note that this 
 means that the velocity needs to have two components, i.e. we could not use this new measurement class on a 1-dimensional problem). With these changes, 
 our new class is complete: 
-```
+```C++
 class our_new_measurement: public IMEASUREMENT{
 
    public:
@@ -452,7 +487,7 @@ class our_new_measurement: public IMEASUREMENT{
 
 ### With custom-built problem classes
 Assume that we have a new potential energy function $U(q)$ whose associated density $\rho$ we want to sample from. We need to add the new problem class to the header file **problems.h**. To see how to write a problem class, we simply compare two of the predefined problems, the 1-dimensinal harmonic oscillator named `HARMONIC_OSCILLATOR_1D` and the 2-dimensional double well problem named `CURVED_DOUBLE_WELL_2D`: 
-```
+```C++
 class HARMONIC_OSCILLATOR_1D: public IPROBLEM {
 /*
 This problem is the 1D harmonic oscillator with spring constant \omega^2.
@@ -528,7 +563,7 @@ The two classes differ at 4 points:
 
 3. Due to different class names and different member variables, the constructors look differently as well, but the structure is always the same. The first arguments passed to the constructor always correspond to the member variables unique to the particular problem class. They are given default values, eg. 25 for the spring constant of the oscillator. The last two arguments of the constructors are always the parameter and velocity vectors that the samplers are operating on (these member variables are inherited from the parent class `IPROBLEM` and are thus automatically visible in every problem class derived from it). They, too, get default values for initialization. Note, however, that their dimension differs: In the case of the 1-dimensional oscillator they are 1-dimensional vectors, as opposed to the 2-dimensional case of the double well.  
 The default values allow for the creation of the objects without passing any parameters, eg.: 
-```
+```C++
     HARMONIC_OSCILLATOR_1D testproblem_default;     /* uses spring constant 25
                                                        and initial conditions (q,p)=(0,0). */
     
@@ -545,7 +580,7 @@ Having understood where the source code of two different problem classes differs
 
 ### With custom-built samplers
 Lastly, we need to know how to add a novel sampler to the library. This setting is a bit more complex as the definition of the class itself and their member functions are in different files. In the header **samplers.h** we need to define our new class. Comparing two samplers that are already there, the `OBABO_sampler` and the `SGHMC_sampler`, we see that, apart from the class name, they don't differ at all: 
-```
+```C++
 class OBABO_sampler: public ISAMPLER{
 /*
 The OBABO splitting scheme.
@@ -601,7 +636,7 @@ Note that whether stochastic gradients are actually used depends on the force ro
 The member variables temperature `T`, friction `gamma`, and step size `h` are used by most samplers and initialized by the corresponding constructors. If we wanted to implement a Metropolized scheme, we would probably have an additional member variable governing the integrator steps taken to propose a new sample.  
 
 Having added the class of our new scheme to the header file, we can move on to define how the scheme is going to collect samples, i.e. we need to write the function `draw_trajectory` in the source file **samplers.cpp**. The case of the `SGHMC_sampler` serves again as an example: 
-```
+```C++
 void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEASUREMENT& RESULTS, const int randomseed, const int t_meas){
 
     // Integrator constants.
@@ -670,7 +705,7 @@ In most cases, the samplers will only differ in two points: They will have diffe
 A lot of the code, such as the initialization of the random number generator will be present in all of the samplers. There are plans to introduce another layer of abstraction so that the user only has to specify the particular update step for the sampler, i.e. what happens in a single iteration of the main loop, rather than rewriting the whole code snippet above. However, as different samplers might have different loop structures, in particular the Metropolis-adjusted compared to the unadjusted ones, this needs some more consideration.
 
 Lastly, from the class definitions in the header file above, we see that the samplers also have a routine called `print_sampler_params`, which is called by the parent class `ISAMPLER` at the start of the MPI simulation. This function has a default implementation (which does nothing), so it does not have to be implemented when writing a new sampler. However, if we want our new scheme to print out some information at the start of the simulation, we can just add it to the **samplers.cpp** file. The `SGHMC_sampler`, for example, comes with 
-```
+```C++
 void SGHMC_sampler::print_sampler_params(){
     
     std:: cout << "SGHMC sampling with parameters:\n";
