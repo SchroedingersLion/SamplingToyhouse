@@ -673,8 +673,8 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
 
     // FINALIZE.
     auto t2 = std:: chrono:: high_resolution_clock:: now();
-	auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
-	std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
+    auto ms_int = std:: chrono:: duration_cast < std:: chrono:: seconds > (t2 - t1);
+    std:: cout << "Execution took " << ms_int.count() << " seconds!\n";
         
     return;
 
