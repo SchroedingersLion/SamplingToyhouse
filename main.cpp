@@ -19,8 +19,8 @@ int main(int argc, char *argv[]){
 
     
     // ### CONSTRUCT THE PROBLEM TO BE SAMPLED ON, DEFINED IN "problems.h". ### //
-    HARMONIC_OSCILLATOR_1D testproblem;
-    
+    HARMONIC_OSCILLATOR_1D testproblem;  
+
     
     // ### CONSTRUCT MEASUREMENT OBJECT DEFINED IN "measurements.h". ### //
     MEASUREMENT_DEFAULT RESULTS(n_dist, t_avg);

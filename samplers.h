@@ -68,8 +68,6 @@ The OBABO splitting scheme.
 
         void print_sampler_params() override;  
 
-        ~OBABO_sampler(){};            // Destructor.
-
 };
 
 
@@ -95,8 +93,6 @@ The BAOAB splitting scheme.
         }; 
 
         void print_sampler_params() override;  
-
-        ~BAOAB_sampler(){};            // Destructor.
 
 };
 
@@ -126,8 +122,6 @@ Note that whether stochastic gradients are actually used depends on the force ro
 
         void print_sampler_params() override;
 
-        ~SGHMC_sampler(){};              // Destructor
-
 };
 
 
@@ -153,8 +147,6 @@ The BBK scheme used in the AMAGOLD method (Zhang et al., 2020). Note that it doe
         }
 
         void print_sampler_params() override;
-
-        ~BBK_AMAGOLD_sampler(){};               // Destructor.
 
 };
 
