@@ -667,7 +667,8 @@ void SGHMC_sampler::print_sampler_params(){
 ## List of implemented samplers
 
 ### OBABO scheme
-Class name: `OBABO_sampler`   
+Class name: `OBABO_sampler` 
+
 A 5-step integrator for Langevin dynamics based on the A-B-O splitting blocks defined in [[1]](#1). The method was first proposed by _Bussi & Parrinello_[[2]](#2), 2007.  
 
 $$\begin{aligned}
@@ -684,6 +685,7 @@ where $a:=e^{-\gamma h}$ and $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. rando
 
 ### BAOAB scheme
 Class name: `BAOAB_sampler`  
+
 A 5-step integrator for Langevin dynamics based on the A-B-O splitting blocks defined in [[1]](#1). It was devised by _Leimkuhler & Matthews_[[3]](#3), 2013.
 
 $$\begin{aligned}
@@ -700,6 +702,7 @@ where $a:=e^{-\gamma h}$ and $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. rando
 
 ### SGHMC scheme
 Class name: `SGHMC_sampler`  
+
 The **S**tochastic **G**radient **H**amilton **M**onte **C**arlo method developed by _Chen et al._[[4]](#4), 2014.
 The name is somewhat misleading here, since we can use this method with unperturbed gradients as well. It consists of the following integrator for Langevin dynamics: 
 
@@ -714,6 +717,7 @@ where $\mathbf{R}\_{n}$ is a random vector sampled from $\mathcal{N}\left(0,\mat
 
 ### BBK scheme (AMAGOLD version)
 Class name: `BBK_AMAGOLD_sampler`  
+
 A variant of the **B**ruenger-**B**rooks-**K**arplus integrator [[5]](#5)[[6]](#6) for Langevin dynamics. This version was recently used by _Zhang et al._[[7]](#7), 2020, in their AMAGOLD method, hence the name.
 
 $$\begin{aligned}
@@ -730,6 +734,7 @@ where $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from 
 
 ### 1-dimensional harmonic oscillator
 Class name: `HARMONIC_OSCILLATOR_1D`  
+
 The harmonic oscillator in a single dimension. 
 
 $$
@@ -741,15 +746,46 @@ with $\omega^2>0$ the so-called spring constant (default value $\omega^{2}=25$).
 <br/>
 
 ### 2-dimensional double well (curved channel)
-Class name: `CURVED_DOUBLE_WELL_2D`
-A two dimensional surface with two minima that are connected via a low-energy channel.
+Class name: `CURVED_DOUBLE_WELL_2D`  
+
+A two-dimensional surface with two minima that are connected by a low-energy channel.
 
 $$
 U(x,y) = a(y-x^2)^2  +  x^2 (b-x)^2,
 $$
 
-where $a,b>0$ are free parameters (their default values are $a=1$, and $b=2$). The minima lie at (0,0) and ($b$,$b^2$). 
+where $a,b>0$ are free parameters (their default values are $a=1$, and $b=2$). The minima lie at (0,0) and ( $b$, $b^{2}$).  
 
+A surface plot:  
+![potential_easier](https://user-images.githubusercontent.com/70909827/230218564-704e4d00-775c-48f4-89ed-718d79de43cb.png)
+
+<br/>
+
+### 2-dimensional double well (symmetric wells of Gaussian shape)
+Class name: `DOUBLE_GAUSSIAN_BASINS_2D`  
+
+A two-dimensional symmetric surface with two Gaussian basins.
+The potential energy is defined by $U(x,y)=-\log(\rho(\boldsymbol{r}))$ with $\boldsymbol{r}=(x,y)^{T}$ and the density $\rho$ of a Gaussian mixture, i.e.
+
+$$
+\rho(\boldsymbol{r})= \sum\_{i=1}^{2} \frac{\phi\_i}{2\pi\sqrt{|\boldsymbol{\Sigma}\_{i}|}} e^{-\frac{1}{2}(\boldsymbol{r}-\boldsymbol{\mu}\_{i})^{T}\boldsymbol{\Sigma}\_{i}^{-1}(\boldsymbol{r}-\boldsymbol{\mu}\_{i})}.
+$$
+
+The parameters of the current implementation are fixed and chosen such that the wells are symmetric:
+$\mu\_{1}=(1,0)^{T}$, $\mu\_{2}=(-1,0)^{T}$, $\phi\_{1}=\phi\_{2}=0.5$, and 
+
+$$
+\boldsymbol{\Sigma}\_{1}=\boldsymbol{\Sigma}\_{2}=
+\left(\begin{array}{cc}
+0.6 & 0.085\\
+0.085 & 0.2
+\end{array}\right).
+$$
+
+The minima lie at (-1,0) and (1,0).  
+
+A surface plot of $\rho(x,y)$:
+![Plot_DW](https://user-images.githubusercontent.com/70909827/230219600-34240c86-dd32-41da-ab18-3d8968ec22c7.png)
 
 
 ## References
