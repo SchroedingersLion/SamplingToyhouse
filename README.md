@@ -73,7 +73,7 @@ In particular, they need to implement the compute_force() routine.
 
 };
 ```
-It holds three member vectors, `parameters` (i.e. the $x\in\mathbb{R}^{m}$ in $U(x)$), `velocities`, and `forces`. Apart from constructor and destructor, 
+It holds three member vectors, `parameters` (i.e. the $x\in\mathbb{R}^{m}$ in $U(x)$ ), `velocities`, and `forces`. Apart from constructor and destructor, 
 it only holds one method, the `compute_force` routine which is a purely virtual function and needs to be defined in every child class. 
 This function will fill the force vector given the parameters, and it is called by the sampling schemes. We will see how to create a particular sampling 
 problem from this interface class in the next section.
