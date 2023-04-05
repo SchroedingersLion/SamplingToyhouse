@@ -2,35 +2,26 @@
 An efficient framework to test novel sampling schemes on simple problems.
 
 ## What is it for?
-We are interested in drawing samples from the continuous density $$\rho(q)\propto e^{-U(q)}$$ 
-with given potential energy function $U(q)$. Our sampling methods of choice are Markov Chain Monte Carlo (MCMC) methods built on either 
-Langevin or Hamiltonian dynamics. 
-Since there is an abundance of different MCMC sampling schemes out there, and researchers keep developing novel algorithms with each passing day, 
-it would be useful to have a library collecting these schemes in a unified way. Moreover, as novel algorithms need to be tested 
-on various problems specified by different $U(q)$, the library of sampling schemes should be accompanied by a library of test problems to run them on. 
-This would be most useful to mathematical researchers (professors and students alike!) working on novel MCMC methods. 
+We are interested in drawing samples from a given continuous probability density $\rho(x)\in L^{1}\cap L^{2}$, where $x\in\mathbb{R}^{m}$ for some $m$, and $L^{1}$ and $L^{2}$ denote the spaces of absolutely and square-integrable functions, respectively. We can transform this into a canonical sampling problem by defining a function $U(x)$ such that $$\rho(x):=\frac{1}{Z}e^{-U(x)}$$,with normalization constant $Z$. We call the function $U(x)=-\log\big(\rho(x)\big)-\log\big(Z\big)$ the potential energy. Note that in the setting we are considering here, it is fine to work with the unnormalized density and assume $Z=1$ from now on.  
+Our sampling methods of choice are Markov Chain Monte Carlo (MCMC) methods. There is an abundance of different MCMC sampling schemes out there, and researchers keep developing novel algorithms with each passing day. Moreover, there are many different problem classes U(x), differing in size and complexity, that are used to test new methods on. At the same time, there are computational packages that provide MCMC sampling capabilities.  
 
-While there are many libraries and frameworks out there that provide state-of-the art sampling schemes, they often suffer from one or more of 
-the following drawbacks:
-
-1. They are too big and complex so that it is difficult for the researcher to know what exactly is going on under the hood. 
+While there are many libraries and frameworks out there, they often suffer from one or more of the following drawbacks:
+1. They are too complex so that the researcher needs to blindly trust their implementation. 
 
 2. They are bloated with tools and utilities that are not of interest to the researcher. 
 
-3. They only offer schemes that had been widely tested and are already in wide use (as opposed to the most recent, most novel schemes that sampling researchers work on). 
+3. They only offer schemes that are already in wide use (as opposed to the most recent, most novel schemes that sampling researchers work on). 
 
-4. They don't offer the option to specify arbitrary test problems $U(q)$ or observables to be collected. 
+4. They don't allow for specifying arbitrary test problems U(x) or observables to collect. 
 
-5. It takes too much programming / software engineering experience to contribute to their development (eg. by adding new samplers).
+5. It takes too much software engineering experience to contribute to their development (eg. by adding new samplers).
 
 
-This project tries to be the answer to these points. It targets the mathematical, statistical, or physical science researcher that works on 
-novel sampling schemes that need to be tested on simple problems. It is a minimalistic framework and aims to be both efficient and easy to use. 
-Moreover, it is straight-forwardly expandable. Specifically, it has the following features:
+This project tries to be the answer to these points. We develop the **SamplingToyhouse** as a handy framework that combines a library of MCMC sampling schemes with a library of problems to test them on. It is an efficient tool for researchers (professors and students alike!) from fields like mathematics, stastistics, or the physical sciences working on novel MCMC methods. The codebase is written in C++ to ensure short runtimes and allow for very rapid examinations of the models (eg. hyperparameter studies). The framework is minimalistic and aims to be both efficient and easy to use. Moreover, it is straight-forwardly expandable. Specifically, it has the following features:
 
-• A library of efficiently implemented MCMC sampling algorithms that is easily expandable.
+• A library of efficiently implemented MCMC sampling algorithms that is easily extendable.
 
-• A library of various test problems governed by different choices of $U(q)$ that is easily expandable.
+• A library of various test problems governed by different choices of U(x) that is easily extendable.
 
 • The straight-forward specification of observables that are to be collected by the samplers.
 
@@ -38,26 +29,14 @@ Moreover, it is straight-forwardly expandable. Specifically, it has the followin
 
 • Support for parallelization using the message-passing-interface (MPI) library.
 
-**A typical usecase would be**: A researcher develops a new sampling algorithm to sample $\rho$. He wants to examine its properties on simple test problems. 
-The advantage of simple problems is that **a)** the corresponding function $U(q)$ is often mathematically benign to the point where the system 
-can be more readily treated by theory, and **b)** the computational cost to obtain results is low. Examples of problems like this are the harmonic 
-oscillator in small dimensions, 2-dimensional double well surfaces, or even data science problems such as simple Bayesian logistic regressions.  
-Once the researcher has an idea of how his new scheme behaves in these settings, he wants to compare its performance to other samplers, some of which are 
-already in world-wide use, others are just as novel and recent as the scheme he just developed.  
-He wants to quickly pick and run various samplers on 
-various simple problems to compare their performance. Moreover, he wants to be able to freely pick which observables to collect on each problem.  
-The results of these experiments will guide his understanding of how different samplers work, how and why they differ, and which ones are the most efficient.
+**A typical usecase would be**: Researchers develop a new sampling algorithm to sample $\rho$. They want to examine its properties on simple test problems. The advantage of simple problems is that **a)** the corresponding function $U(x)$ is often mathematically benign to the point where the system can be more readily treated by theory, and **b)** the computational cost to obtain results is low. Examples of problems like this are the harmonic oscillator in small dimensions, 2-dimensional double well surfaces, or even data science problems such as Bayesian logistic regressions with small numbers of parameters.  
+Once the researchers have an idea of how their new scheme behaves in these settings, they want to compare its performance to other samplers, some of which are already in world-wide use, others are just as novel and recent as the scheme they just designed. They want to quickly pick and run various samplers on various simple problems to compare their performance. Moreover, they want to be able to freely pick which observables to collect on each problem. The results of these experiments will guide their understanding of how different samplers work, how and why they differ, and which ones are the most efficient.
 
 ## What is it not for?
-The simplicity by which new sampling problems $U(q)$ can be defined in this framework comes at the price of the problems having to be comparably simple. 
-In particular, the gradients of the functions $U(q)$ need to be hardcoded into the problems. Problems that are built on complex models such as deep neural 
-networks will be very tedious to implement here, as this framework does not offer automatic backpropagation nor any of the fancy regularization methods 
-often used in deep learning. Another example of problems that are “too big” are larger molecular dynamics (MD) simulations. While the hardcoding 
-of the gradients is typically not an issue there, efficiency is. When simulating a system of $N$ interacting particles, one often needs to employ 
-high-performance-computing techniques beyond what this framework has to offer. Therefore, if one is interested in large-scale sampling problems, 
-one should resort to using other libraries/frameworks or write their own code from scratch. This means that this framework is most likely useless to 
-the machine learning researcher working with big-data models, the molecular researcher working with large-scale MD simulations, and certainly to 
-companies trying to solve industrial problems. It is the Sampling-TOY-house, after all.
+The simplicity by which new sampling problems $U(x)$ can be defined in this framework comes at the price of the problems having to be comparably simple. In particular, the gradients of the functions $U(x)$ need to be hardcoded into the problems. Problems that are built on complex models such as deep neural networks will be very tedious to implement here, as this framework does not offer automatic backpropagation nor any of the fancy regularization methods often used in deep learning. Another example of problems that are “too big” are larger molecular dynamics (MD) simulations. While the hardcoding of the gradients is typically not an issue there, efficiency is. When simulating a system of $N$ interacting particles, one often needs to employ high-performance-computing techniques beyond what this framework has to offer. Therefore, if one is interested in large-scale sampling problems, one should resort to using other libraries / frameworks or write their own code from scratch.  
+This means that this framework is most likely useless to the machine learning researcher working with big-data models, the molecular researcher working with large-scale MD simulations, and certainly to companies trying to solve industrial problems. It is the Sampling-TOY-house, after all.
+
+**That being said:** We are already working on plans to allow for the treatment of larger models, in particular through the usage of symbolic differentiation and interfaces to widely used deep learning frameworks.
 
 ## The Three Building Blocks
 Here we give a high-level overview of the three building blocks the framework is comprised of: The problem library, the measurement library, 
