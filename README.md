@@ -728,6 +728,30 @@ where $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from 
 
 ## List of implemented problems
 
+### 1-dimensional harmonic oscillator
+Class name: `HARMONIC_OSCILLATOR_1D`  
+The harmonic oscillator in a single dimension. 
+
+$$
+U(x) = \frac{1}{2}\omega^{2}x^{2},
+$$
+
+with $\omega^2>0$ the so-called spring constant (default value $\omega^{2}=25$). 
+
+<br/>
+
+### 2-dimensional double well (curved channel)
+Class name: `CURVED_DOUBLE_WELL_2D`
+A two dimensional surface with two minima that are connected via a low-energy channel.
+
+$$
+U(x,y) = a(y-x^2)^2  +  x^2 (b-x)^2,
+$$
+
+where $a,b>0$ are free parameters (their default values are $a=1$, and $b=2$). The minima lie at (0,0) and ($b$,$b^2$). 
+
+
+
 ## References
 <a id="1">[1]</a> 
 **Leimkuhler, B., Matthews, C.** Molecular Dynamics. _Springer_, 2016.
