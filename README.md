@@ -2,8 +2,9 @@
 An efficient framework to test novel sampling schemes on simple problems.
 
 ## What is it for?
-We are interested in drawing samples from a given continuous probability density $\rho(x)\in L^{1}\cap L^{2}$, where $x\in\mathbb{R}^{m}$ for some $m$, and $L^{1}$ and $L^{2}$ denote the spaces of absolutely and square-integrable functions, respectively. We can transform this into a canonical sampling problem by defining a function $U(x)$ such that $$\rho(x):=\frac{1}{Z}e^{-U(x)}$$,with normalization constant $Z$. We call the function $U(x)=-\log\big(\rho(x)\big)-\log\big(Z\big)$ the potential energy. Note that in the setting we are considering here, it is fine to work with the unnormalized density and assume $Z=1$ from now on.  
-Our sampling methods of choice are Markov Chain Monte Carlo (MCMC) methods. There is an abundance of different MCMC sampling schemes out there, and researchers keep developing novel algorithms with each passing day. Moreover, there are many different problem classes U(x), differing in size and complexity, that are used to test new methods on. At the same time, there are computational packages that provide MCMC sampling capabilities.  
+We are interested in drawing samples from a given continuous probability density $\rho(x)\in L^{1}\cap L^{2}$, where $x\in\mathbb{R}^{m}$ for some $m$, and $L^{1}$ and $L^{2}$ denote the spaces of absolutely and square-integrable functions, respectively. We can transform this into a canonical sampling problem by defining a function $U(x)$ such that $$\rho(x):=\frac{1}{Z}e^{-U(x)},$$ with normalization constant $Z$. We call the function $U(x)=-\log\big(\rho(x)\big)-\log\big(Z\big)$ the **potential energy**. Note that in the setting we are considering here, it is fine to work with the unnormalized density and assume $Z=1$ from now on. 
+
+Our sampling methods of choice are Markov Chain Monte Carlo (MCMC) methods. There is an abundance of different MCMC sampling schemes out there, and researchers keep developing novel algorithms with each passing day. Moreover, there are many different problem classes $U(x)$, differing in size and complexity, that are used to test new methods on. At the same time, there are computational packages that provide MCMC sampling capabilities.  
 
 While there are many libraries and frameworks out there, they often suffer from one or more of the following drawbacks:
 1. They are too complex so that the researcher needs to blindly trust their implementation. 
@@ -12,7 +13,7 @@ While there are many libraries and frameworks out there, they often suffer from 
 
 3. They only offer schemes that are already in wide use (as opposed to the most recent, most novel schemes that sampling researchers work on). 
 
-4. They don't allow for specifying arbitrary test problems U(x) or observables to collect. 
+4. They don't allow for specifying arbitrary test problems $U(x)$ or observables to collect. 
 
 5. It takes too much software engineering experience to contribute to their development (eg. by adding new samplers).
 
@@ -21,7 +22,7 @@ This project tries to be the answer to these points. We develop the **SamplingTo
 
 • A library of efficiently implemented MCMC sampling algorithms that is easily extendable.
 
-• A library of various test problems governed by different choices of U(x) that is easily extendable.
+• A library of various test problems governed by different choices of $U(x)$ that is easily extendable.
 
 • The straight-forward specification of observables that are to be collected by the samplers.
 
@@ -72,7 +73,7 @@ In particular, they need to implement the compute_force() routine.
 
 };
 ```
-It holds three member vectors, `parameters` (i.e. the position q), `velocities`, and `forces`. Apart from constructor and destructor, 
+It holds three member vectors, `parameters` (i.e. the $x\in\mathbb{R}^{m}$ in $U(x)$), `velocities`, and `forces`. Apart from constructor and destructor, 
 it only holds one method, the `compute_force` routine which is a purely virtual function and needs to be defined in every child class. 
 This function will fill the force vector given the parameters, and it is called by the sampling schemes. We will see how to create a particular sampling 
 problem from this interface class in the next section.
@@ -227,7 +228,7 @@ process-averaged and printed to a file by the samplers at the end of the simulat
 trajectory data for every 1000th sampler step, one needs to pick `t_meas` and `n_dist` such that 1000= `t_meas` x `n_dist`.  
 
 The header **measurements.h** already holds a predefined measurement class, named `MEASUREMENT_DEFAULT`, that is usable with any sampling problem. Its implementation of `compute_sample` collects the first position coordinate, the kinetic temperature  
-$T_{kin}=\frac{1}{N_{d}}p\cdot p$, and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}q\cdot F$ as samples, where $N_d$ is the number of degrees of freedom.  
+$T_{kin}=\frac{1}{N_{d}}p\cdot p$, and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}x\cdot F$ as samples, where $N_d$ is the number of degrees of freedom.  
 Its implementation is displayed in the next section as an example to create measurement classes derived from `IMEASUREMENT`.
 
 ### The Sampler Library
@@ -282,11 +283,11 @@ respective MPI library being used on the system. On a Linux machine using the _O
 `mpicxx -O3 -o main.exe main.cpp samplers.cpp`. This will create an executable called **main.exe** which can be run via `mpirun -n N main.exe`, where N needs to be replaced by the number of MPI processes that are supposed to be launched. Each process will draw a single trajectory.
 
 ### With predefined samplers, problems, and measurement objects
-In the simplest case, a user might want to sample one of the problems that are already implemented in the problem library, using a sampler that 
-is already implemented in the sampler library. If he is also happy with the observables taken by one of the measurement classes that are already 
-implemented, all he has to do is to write up a main file which loads and initializes the corresponding objects from the libraries, and call the 
+In the simplest case, users might want to sample one of the problems that are already implemented in the problem library, using a sampler that 
+is already implemented in the sampler library. If they are also happy with the observables taken by one of the measurement classes that are already 
+implemented, all they have to do is to write up a main file which loads and initializes the corresponding objects from the libraries, and call the 
 `run_mpi_simulation` routine.  
-An example main file for sampling from the 1-dimensional harmonic oscillator using the OBABO splitting scheme could look as follows: 
+An example main file for sampling from the 1-dimensional harmonic oscillator, given by $$U(x)=\frac{1}{2} \omega^{2}x^{2},$$ with $x\in \mathbb{R}$ and spring constant $\omega^{2}>0$, is shown below. The sampler of choice is the OBABO splitting scheme. 
 ```C++
 #include "samplers.h"
 #include "problems.h"
@@ -329,7 +330,7 @@ to `false`, meaning that no time-average is taken. Running the code via `mpirun 
 python script, we plot the results:  
 
 ![HO_demo_single](https://user-images.githubusercontent.com/70909827/228239263-b2089ae9-3b68-42ea-a2b1-700c742ae102.png)
-We see wild oscillations (pun intended) in the observables coming from the fact that we did not use any kind of averaging.  
+We see wild oscillations in the observables coming from the fact that we did not use any kind of averaging.  
 Rerunning the code with 100 processes will lead to an average over 100 different trajectories, generating the following results:  
 
 ![HO_demo_100traj](https://user-images.githubusercontent.com/70909827/228239583-c03f90a4-f8a1-48b1-9db4-7278f224b58a.png)
@@ -358,11 +359,6 @@ BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D testproblem(filename, batchsize);
 ```
 Note that the `run_mpi_simulation` routine always takes in the same parameters, independently of the sampler, as it is a member function of the sampler 
 interface class (see the previous section). 
-
-
-**Exercise:** Draw samples on the predefined 2-dimensional double well problem with Gaussian basins, using the SGHMC method. You can use the default 
-measurement class again. The sampler parameters given in the code snippet above should work here as well. Plot the results to check whether the 
-observables converge properly.
 
 
 ### With custom-built measurement objects
@@ -405,8 +401,7 @@ the kinetic, and the configurational temperature given by Force \cdot Position.
 To create our own measurement class, we can simply copy'n paste this default measurement class and make the needed adjustments.  
 First, we change the class name from `MEASUREMENT_DEFAULT` to `our_new_measurement`. Note that the name also appears with the constructor. 
 Next we inspect the arguments of the constructor. We only need to change the number `3` to the number of observables our new class is supposed to collect. 
-Since we want to collect two observables, the number is changed to `2`. This usage of “magic numbers” is a design flaw already addressed by the comment 
-above the constructor; we ignore it for now. All other arguments nor anything else in the constructor **must not** be changed.  
+We assume we want to collect two observables, so the number `3` is changed to `2`. This usage of “magic numbers” is a design flaw already addressed by the comment above the constructor; we ignore it for now. All other arguments or any other part of the constructor **must not** be changed.  
 The last edit we need to do is the modification of the `compute_sample` routine. The signature of the function needs to remain the same, the function 
 body needs to be changed. Since we only collect two observables, the third line in the function body needs to be deleted. Then, the right-hand side of 
 the first two lines needs to be changed to correspond to the observables we want to take. Rather than simply taking the first model parameter, we want to 
@@ -432,10 +427,10 @@ class our_new_measurement: public IMEASUREMENT{
 
 };
 ```
-**Exercise:** Write a measurement class that collects two observables, namely twice the kinetic temperature given by $2T_{kin}=\frac{2}{N_d}p\cdot p$ and half the configurational temperature $\frac{1}{2}T_{conf}=-\frac{1}{2N_d}q\cdot F$. Pick one of the predefined samplers and run them on the same double well problem as in the previous exercise. Plot the results to check whether the observables converge properly.
+
 
 ### With custom-built problem classes
-Assume that we have a new potential energy function $U(q)$ whose associated density $\rho$ we want to sample from. We need to add the new problem class to the header file **problems.h**. To see how to write a problem class, we simply compare two of the predefined problems, the 1-dimensinal harmonic oscillator named `HARMONIC_OSCILLATOR_1D` and the 2-dimensional double well problem named `CURVED_DOUBLE_WELL_2D`: 
+Assume that we have a new potential energy function $U(x)$ whose associated density $\rho$ we want to sample from. We need to add the new problem class to the header file **problems.h**. To see how to write a problem class, we simply compare two of the predefined problems, the 1-dimensinal harmonic oscillator named `HARMONIC_OSCILLATOR_1D` and the 2-dimensional double well problem named `CURVED_DOUBLE_WELL_2D`: 
 ```C++
 class HARMONIC_OSCILLATOR_1D: public IPROBLEM {
 /*
@@ -514,22 +509,21 @@ The two classes differ at 4 points:
 
 2. They have different private member variables. These are the variables used by the force computation routine. They can be variables defining the potential (such as the spring constant for the oscillator), or help variables that make computations more efficient (such as `min_two_a` in the double well case). Note that both problems inherit the member vectors `parameters`, `velocities`, and `forces` from the interface class. 
 
-3. Due to different class names and different member variables, the constructors look differently as well, but the structure is always the same. The first arguments passed to the constructor always correspond to the member variables unique to the particular problem class. They are given default values, eg. 25 for the spring constant of the oscillator. The last two arguments of the constructors are always the parameter and velocity vectors that the samplers are operating on (these member variables are inherited from the parent class `IPROBLEM` and are thus automatically visible in every problem class derived from it). They, too, get default values for initialization. Note, however, that their dimension differs: In the case of the 1-dimensional oscillator they are 1-dimensional vectors, as opposed to the 2-dimensional case of the double well.  
+3. Due to different class names and different member variables, the constructors look differently as well, but the structure is always the same. The first arguments passed to the constructor always correspond to the member variables unique to the particular problem class. They are given default values, eg. `25` for the spring constant of the oscillator. The last two arguments of the constructors are always the parameter and velocity vectors that the samplers are operating on (these member variables are inherited from the parent class `IPROBLEM` and are thus automatically visible in every problem class derived from it). They, too, get default values for initialization. Note, however, that their dimension differs: In the case of the 1-dimensional oscillator they are 1-dimensional vectors, as opposed to the 2-dimensional case of the double well.  
 The default values allow for the creation of the objects without passing any parameters, eg.: 
 ```C++
     HARMONIC_OSCILLATOR_1D testproblem_default;     /* uses spring constant 25
-                                                       and initial conditions (q,p)=(0,0). */
+                                                       and initial conditions (x,p)=(0,0). */
     
     HARMONIC_OSCILLATOR_1D testproblem_custom(10);  /* uses spring constant 10
-                                                       and initial conditions (q,p)=(0,0). */
+                                                       and initial conditions (x,p)=(0,0). */
 ```
 In the next line of the constructor, the parameters and velocity vectors are passed to the parent class constructor, `IPROBLEM(init_params, init_velocities)`. This part **must remain unchanged**. After this, in the same line, we have the member initialization lists, where the member variables unique to the problem class are initialized via the input arguments passed to the constructor. The constructor ends with an empty function body given by `{}`. For more complex problems, this function body would not be empty. In the case of a data science problem, this could be the place where the data set is read in from a file and stored in a vector (see the predefined problem class `BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D`). Also, when using noise in the force evaluations, this would be the place where the random number generator is created and initialized.
 
-4. Lastly, the functions `compute_force` differ between problems. These functions typically don't take input arguments. Given the member variables defining the potential (`omega_sq` for the oscillator, and `a` and `b` for the double well), and given the current entries in the member vector `parameters` (storing the current “positions” of the model), this function computes the forces $-\nabla U(q)$ and stores the results in the (inherited) member vector `forces`. You may convince yourself that the formulas used to compute the force entries are indeed computing the negative gradient of the corresponding potentials (and let me know if they don't!). Note that `compute_force` does not have to compute $-\nabla U(q)$ exactly. Adding noise terms, for example, is perfectly fine.  
+4. Lastly, the functions `compute_force` differ between problems. These functions typically don't take input arguments. Given the member variables defining the potential (`omega_sq` for the oscillator, and `a` and `b` for the double well), and given the current entries in the member vector `parameters` (storing the current “positions” of the model), this function computes the forces $-\nabla U(x)$ and stores the results in the (inherited) member vector `forces`. You may convince yourself that the formulas used to compute the force entries are indeed computing the negative gradient of the corresponding potentials (and let me know if they don't!). Note that `compute_force` does not have to compute $-\nabla U(x)$ exactly. Adding noise terms, for example, is perfectly fine.  
 
 Having understood where the source code of two different problem classes differs and where it is the same, we are in a good position to come up with our own problem classes.  
 
-**Exercise:** The Rosenbrock potential in 4 dimensions is given by $$U(x_{1},x_{2},x_{3},x_{4})=\sum_{i=1}^{3}\Big[100\big(x_{i+1}-x_{i}^{2}\big)^{2}+\big(1-x_{i}\big)^{2}\Big]$$ and has 2 minima, one at (1,1,1,1) and one close to (-1,1,1,1). Write a problem class corresponding to this problem. Then, using one of the predefined samplers and the default measurement class, collect samples from it. Examine the results via plotting.
 
 ### With custom-built samplers
 Lastly, we need to know how to add a novel sampler to the library. This setting is a bit more complex as the definition of the class itself and their member functions are in different files. In the header **samplers.h** we need to define our new class. Comparing two samplers that are already there, the `OBABO_sampler` and the `SGHMC_sampler`, we see that, apart from the class name, they don't differ at all: 
@@ -555,8 +549,6 @@ The OBABO splitting scheme.
         }; 
 
         void print_sampler_params() override;  
-
-        ~OBABO_sampler(){};            // Destructor.
 
 };
 
@@ -585,11 +577,9 @@ problem class passed as an argument.
 
         void print_sampler_params() override;
 
-        ~SGHMC_sampler(){};              // Destructor
-
 };
 ``` 
-The member variables temperature `T`, friction `gamma`, and step size `h` are used by most samplers and initialized by the corresponding constructors. If we wanted to implement a Metropolized scheme, we would probably have an additional member variable governing the integrator steps taken to propose a new sample.  
+The member variables temperature `T`, friction `gamma`, and step size `h` are used by most samplers and initialized by the corresponding constructors. If we wanted to implement a Metropolized scheme, we would probably have an additional member variable governing the number integrator steps taken to propose a new sample.  
 
 Having added the class of our new scheme to the header file, we can move on to define how the scheme is going to collect samples, i.e. we need to write the function `draw_trajectory` in the source file **samplers.cpp**. The case of the `SGHMC_sampler` serves again as an example: 
 ```C++
@@ -659,8 +649,8 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
 
 };
 ```
-Note that the routine operates on the parameters and velocities that are part of the problem class passed as an input argument. Since the sampler itself does not know the dimension of these vectors, it is important to ask for their size at the beginning and loop over them when they are updated.  
-In most cases, the samplers will only differ in two points: They will have different help constants used by the integrators (at the very top of the function body in the snippet above). And, of course, the update steps in the main loop will be different. Note that forces are computed via `problem.compute_force();` and measurements need to be taken via `RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);`. Where the measurements are taken **should not be changed from sampler to sampler**.  
+The input arguments of `draw_trajectory` are the same for all samplers. Note that the routine operates on the parameters and velocities that are part of the problem class passed as an input argument. Since the sampler itself does not know the dimension of these vectors, it is important to ask for their size at the beginning and loop over them when they are updated.  
+In most cases, the samplers will only differ in two points: They will have different help constants used by the integrators (at the very top of the function body in the snippet above). And, of course, the update steps in the main loop will be different. Note that forces are computed via `problem.compute_force();` and measurements need to be taken via `RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);`. Where the measurements are taken **should not be changed from sampler to sampler**. 
 
 A lot of the code, such as the initialization of the random number generator will be present in all of the samplers. There are plans to introduce another layer of abstraction so that the user only has to specify the particular update step for the sampler, i.e. what happens in a single iteration of the main loop, rather than rewriting the whole code snippet above. However, as different samplers might have different loop structures, in particular the Metropolis-adjusted compared to the unadjusted ones, this needs some more consideration.
 
@@ -673,4 +663,4 @@ void SGHMC_sampler::print_sampler_params(){
 
 };
 ````
-**Exercise:** Implement the ABO-splitting scheme for Langevin dynamics as a new sampler class. You can take the `OBABO_sampler` as guidance. Load the 1-dimensional harmonic oscillator as well as the default measurement class. Run the sampler and plot the results to check the convergence of the observables.
+
