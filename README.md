@@ -664,3 +664,90 @@ void SGHMC_sampler::print_sampler_params(){
 };
 ````
 
+## List of implemented samplers
+
+### OBABO scheme
+Class name: `OBABO_sampler`   
+A 5-step integrator for Langevin dynamics based on the A-B-O splitting blocks defined in [[1]](#1). The method was first proposed by _Bussi & Parrinello_[[2]](#2), 2007.  
+
+$$\begin{aligned}
+\text{(O)}\qquad\boldsymbol{p}\_{n+\frac{1}{4}} &= \sqrt{a}\boldsymbol{p}\_{n}+\sqrt{T(1-a)}\mathbf{R}\_{n},\\
+\text{(B)}\qquad\boldsymbol{p}\_{n+\frac{1}{2}} &= \boldsymbol{p}\_{n+\frac{1}{4}}-\frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n}\right),\\
+\text{(A)}\\,\qquad\boldsymbol{x}\_{n+1} &= \boldsymbol{x}\_{n}+h\boldsymbol{p}\_{n+\frac{1}{2}},\\
+\text{(B)}\qquad\boldsymbol{p}\_{n+\frac{3}{4}} &= \boldsymbol{p}\_{n+\frac{1}{2}}-\frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n+1}\right),\\
+\text{(O)}\qquad\boldsymbol{p}\_{n+1} &= \sqrt{a}\boldsymbol{p}\_{n+\frac{3}{4}}+\sqrt{T(1-a)}\mathbf{R}\_{n'},
+\end{aligned}$$
+
+where $a:=e^{-\gamma h}$ and $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from $\mathcal{N}\left(0,\mathbf{1_{m}}\right)$.
+
+<br/>
+
+### BAOAB scheme
+Class name: `BAOAB_sampler`  
+A 5-step integrator for Langevin dynamics based on the A-B-O splitting blocks defined in [[1]](#1). It was devised by _Leimkuhler & Matthews_[[3]](#3), 2013.
+
+$$\begin{aligned}
+\text{(B)}\qquad\boldsymbol{p}\_{n+\frac{1}{2}} &= \boldsymbol{p}\_{n+\frac{1}{4}}-\frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n}\right),\\
+\text{(A)}\\,\qquad\boldsymbol{x}\_{n+1} &= \boldsymbol{x}\_{n}+\frac{h}{2}\boldsymbol{p}\_{n+\frac{1}{2}},\\
+\text{(O)}\qquad\boldsymbol{p}\_{n+\frac{1}{4}} &= a\boldsymbol{p}\_{n}+\sqrt{T(1-a^{2})}\mathbf{R}\_{n},\\
+\text{(A)}\\,\qquad\boldsymbol{x}\_{n+1} &= \boldsymbol{x}\_{n}+\frac{h}{2}\boldsymbol{p}\_{n+\frac{1}{2}},\\
+\text{(B)}\qquad\boldsymbol{p}\_{n+\frac{3}{4}} &= \boldsymbol{p}\_{n+\frac{1}{2}}-\frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n+1}\right),
+\end{aligned}$$
+
+where $a:=e^{-\gamma h}$ and $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from $\mathcal{N}\left(0,\mathbf{1_{m}}\right)$.
+
+<br/>
+
+### SGHMC scheme
+Class name: `SGHMC_sampler`  
+The **S**tochastic **G**radient **H**amilton **M**onte **C**arlo method developed by _Chen et al._[[4]](#4), 2014.
+The name is somewhat misleading here, since we can use this method with unperturbed gradients as well. It consists of the following integrator for Langevin dynamics: 
+
+$$\begin{aligned}
+\boldsymbol{p}\_{n+1} &= (1-h\gamma)\boldsymbol{p}\_{n} - h\nabla U\left(\boldsymbol{x}\_{n}\right) + \sqrt{2h\gamma T} \mathbf{R}\_{n}, \\
+\boldsymbol{x}\_{n+1} &= \boldsymbol{x}\_{n} +h \boldsymbol{p}\_{n+1},
+\end{aligned}$$
+
+where $\mathbf{R}\_{n}$ is a random vector sampled from $\mathcal{N}\left(0,\mathbf{1_{m}}\right)$.
+
+<br/>
+
+### BBK scheme (AMAGOLD version)
+Class name: `BBK_AMAGOLD_sampler`  
+A variant of the **B**ruenger-**B**rooks-**K**arplus integrator [[5]](#5)[[6]](#6) for Langevin dynamics. This version was recently used by _Zhang et al._[[7]](#7), 2020, in their AMAGOLD method, hence the name.
+
+$$\begin{aligned}
+\boldsymbol{p}\_{n+\frac{1}{2}} &= \bigg(1-\frac{h\gamma}{2}\bigg)\boldsymbol{p}\_{n} - \frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n}\right) + \frac{1}{2}\sqrt{2h\gamma T} \mathbf{R}\_{n}, \\
+\boldsymbol{x}\_{n+1} &= \boldsymbol{x}\_{n} +h \boldsymbol{p}\_{n+\frac{1}{2}}, \\
+\boldsymbol{p}\_{n+1} &= \frac{1}{1+\frac{h\gamma}{2}} \bigg( \boldsymbol{p}\_{n+\frac{1}{2}}- \frac{h}{2}\nabla U\left(\boldsymbol{x}\_{n+1}\right) + \frac{1}{2}\sqrt{2h\gamma T} \mathbf{R}\_{n'} \bigg),
+\end{aligned}$$
+
+where $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from $\mathcal{N}\left(0,\mathbf{1_{m}}\right)$.
+
+<br/>
+
+## List of implemented problems
+
+## References
+<a id="1">[1]</a> 
+**Leimkuhler, B., Matthews, C.** Molecular Dynamics. _Springer_, 2016.
+
+<a id="2">[2]</a> 
+**Bussi, G., Parrinello, M.** Accurate sampling using Langevin dynamics. _Phys. Rev. E 75_, 056,707., 2007.   
+[doi:10.1103/PhysRevE.75.056707](https://doi.org/10.1103/PhysRevE.75.056707).
+
+<a id="3">[3]</a> 
+**Leimkuhler, B., Matthews, C.** Rational construction of stochastic numerical methods for molecular sampling. _Appl. Math. Res. Express 1_, 4–56, 2013. [doi:10.1093/amrx/abs010](https://doi.org/10.1093/amrx/abs010).
+
+<a id="4">[4]</a> 
+**Chen, T., Fox, E., Guestrin, C.** Stochastic gradient Hamiltonian Monte Carlo. In _International Conference on Machine Learning_, pp. 1683–1691, 2014.
+[arXiv:1402.4102v2](https://arxiv.org/abs/1402.4102v2).
+
+<a id="5">[5]</a> 
+**Bruenger, A., Brooks III, C., Karplus, M.** Stochastic boundary conditions for molecular dynamics simulations of ST2 water. _Chem. Phys. Lett._, 105(5):495-500, 1984. [https://doi.org/10.1016/0009-2614(84)80098-6](https://doi.org/10.1016/0009-2614(84)80098-6).
+
+<a id="6">[6]</a>
+**Finkelstein, J., Fiorin, G., Seibold, B.** Comparison of modern Langevin integrators for simulations of coarse-grained polymer melts, _Mol. Phys._, 2019. [doi: 10.1080/00268976.2019.1649493](https://doi.org/10.1080/00268976.2019.1649493).
+
+<a id="7">[7]</a> 
+**Zhang, R., Cooper, A.F., De Sa, C**. AMAGOLD: Amortized Metropolis adjustment for efficient stochastic gradient MCMC. _arXiv preprint_, 2020. [arXiv:2003.00193v1](https://arxiv.org/abs/2003.00193).
