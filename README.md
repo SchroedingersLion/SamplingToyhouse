@@ -631,9 +631,9 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
 					 
 
         // TAKE MEASUREMENT.
-		if( i % t_meas == 0 ) {                                                 
-            		RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);        
-		}
+	if( i % t_meas == 0 ) {                                                 
+            RESULTS.take_measurement(problem.parameters, problem.velocities, problem.forces);        
+	}
 		
         if( i % int(1e5) == 0 ) std:: cout << "Iteration " << i << " done!\n";
 	
