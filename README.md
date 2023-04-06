@@ -1,4 +1,4 @@
-(for better code formatting, open this README in full view.)
+(For better code formatting, open this README in full view.)
 
 # SamplingToyhouse
 An efficient framework to test novel sampling schemes on simple problems.
