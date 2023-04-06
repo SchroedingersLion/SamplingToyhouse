@@ -732,7 +732,7 @@ where $\mathbf{R}\_{n},\mathbf{R}\_{n'}$ are i.i.d. random vectors sampled from 
 
 ## List of implemented problems
 
-### 1-dimensional harmonic oscillator
+### Harmonic oscillator (1-dimensional)
 Class name: `HARMONIC_OSCILLATOR_1D`  
 
 The harmonic oscillator in a single dimension. 
@@ -745,7 +745,7 @@ with $\omega^2>0$ the so-called spring constant (default value $\omega^{2}=25$).
 
 <br/>
 
-### 2-dimensional double well (curved channel)
+### Double well: 2-dimensional (curved channel)
 Class name: `CURVED_DOUBLE_WELL_2D`  
 
 A two-dimensional surface with two minima that are connected by a low-energy channel.
@@ -761,7 +761,7 @@ A surface plot:
 
 <br/>
 
-### 2-dimensional double well (symmetric wells of Gaussian shape)
+### Double well: 2-dimensional (symmetric wells of Gaussian shape)
 Class name: `DOUBLE_GAUSSIAN_BASINS_2D`  
 
 A two-dimensional symmetric surface with two Gaussian basins.
@@ -786,6 +786,47 @@ The minima lie at (-1,0) and (1,0).
 
 A surface plot of $\rho(x,y)$:
 ![Plot_DW](https://user-images.githubusercontent.com/70909827/230219600-34240c86-dd32-41da-ab18-3d8968ec22c7.png)
+
+<br/>
+
+### Bayesian inference: Means of Gaussian mixture (2 components, 1-dimensional data)
+Class name: `BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D`
+
+Bayesian inference of the means of a Gaussian mixture model with two components for 1-dimensional data.  
+The likelihood function is given by
+
+$$
+p(x|\mu\_{1},\mu\_{2}) = \frac{\alpha\_{1}}{\sqrt{2\pi \sigma\_{1}^{2}}}e^{-\frac{(x-\mu\_{1})^{2}}{2\sigma\_{1}^{2}}} + 
+			   \frac{\alpha\_{2}}{\sqrt{2\pi \sigma\_{2}^{2}}}e^{-\frac{(x-\mu\_{2})^{2}}{2\sigma\_{2}^{2}}}, 
+$$
+
+where $\mu\_{i}$ are the means to be inferred, and $\alpha\_{i},\sigma\_{i}$ are fixed parameters.
+In this implementation, they are given by
+
+$$
+\begin{aligned}
+\alpha\_{1} &= 0.8, \\
+\alpha\_{2} &= 1-\alpha\_{1}=0.2, \\
+\sigma\_{1} &= 3, \\
+\sigma\_{2} &= 0.5.
+\end{aligned}
+$$
+
+The class imposes a Gaussian prior $p(\mu\_{1}, \mu\_{2})$ on $(\mu\_{1}, \mu\_{2})$, with mean $(0,0)$ and covariance matrix $\sigma\_{0}^{2}\mathbf{I}$ with unit matrix $\mathbf{I}$ and $\sigma\_{0}=5$.  
+
+The posterior density then yields the potential energy $U(\mu\_{1}, \mu\_{2})$ via
+
+$$
+p(\mu\_{1},\mu\_{2}| \mathcal{D}) = p(\mu\_{1}, \mu\_{2}) \prod\_{x\_{i} \in \mathcal{D}} p(x\_{i}|\mu\_{1},\mu\_{2})\propto e^{-U(\mu\_{1},\mu\_{2})}, 
+$$
+
+where the product goes over the given data set $\mathcal{D}:=\\{ x\_{i}\\, |\\, i=1,...,N \\}$.  
+Note that the data needs to be read in upon construction of the object. This is done by passing a file name to the constructor. The file is expected to hold a single column of real numbers, namely the $x\_{i}$.  
+Moreover, this method is built with the aim of using stochastic gradients, so an integer variable giving the batch size needs to be passed to the constructor. If full gradients are to be used, simply pass the total number of data points in the set.
+
+A plot of the likelihood function for some chosen values $(\mu\_{1},\mu\_{2})=(-2.5, 2.5)$ and a histogram of data sampled from it:
+![gauss_mix_500](https://user-images.githubusercontent.com/70909827/230507428-27e15705-cdc5-494f-bffc-0cf25d775bf3.png)
+
 
 
 ## References
