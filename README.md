@@ -3,6 +3,8 @@
 # SamplingToyhouse
 An efficient framework to test novel sampling schemes on simple problems.
 
+<br/>
+
 ## What is it for?
 We are interested in drawing samples from a given continuous probability density $\rho(x)\in L^{1}\cap L^{2}$, where $x\in\mathbb{R}^{m}$ for some $m$, and $L^{1}$ and $L^{2}$ denote the spaces of absolutely and square-integrable functions, respectively. We can transform this into a canonical sampling problem by defining a function $U(x)$ such that $$\rho(x):=\frac{1}{Z}e^{-U(x)},$$ with normalization constant $Z$. We call the function $U(x)=-\log\big(\rho(x)\big)-\log\big(Z\big)$ the **potential energy**. Note that in the setting we are considering here, it is fine to work with the unnormalized density and assume $Z=1$ from now on. 
 
@@ -35,17 +37,23 @@ This project tries to be the answer to these points. We develop the **SamplingTo
 **A typical usecase would be**: Researchers develop a new sampling algorithm to sample $\rho$. They want to examine its properties on simple test problems. The advantage of simple problems is that **a)** the corresponding function $U(x)$ is often mathematically benign to the point where the system can be more readily treated by theory, and **b)** the computational cost to obtain results is low. Examples of problems like this are the harmonic oscillator in small dimensions, 2-dimensional double well surfaces, or even data science problems such as Bayesian logistic regressions with small numbers of parameters.  
 Once the researchers have an idea of how their new scheme behaves in these settings, they want to compare its performance to other samplers, some of which are already in world-wide use, others are just as novel and recent as the scheme they just designed. They want to quickly pick and run various samplers on various simple problems to compare their performance. Moreover, they want to be able to freely pick which observables to collect on each problem. The results of these experiments will guide their understanding of how different samplers work, how and why they differ, and which ones are the most efficient.
 
+<br/>
+
 ## What is it not for?
 The simplicity by which new sampling problems $U(x)$ can be defined in this framework comes at the price of the problems having to be comparably simple. In particular, the gradients of the functions $U(x)$ need to be hardcoded into the problems. Problems that are built on complex models such as deep neural networks will be very tedious to implement here, as this framework does not offer automatic backpropagation nor any of the fancy regularization methods often used in deep learning. Another example of problems that are “too big” are larger molecular dynamics (MD) simulations. While the hardcoding of the gradients is typically not an issue there, efficiency is. When simulating a system of $N$ interacting particles, one often needs to employ high-performance-computing techniques beyond what this framework has to offer. Therefore, if one is interested in large-scale sampling problems, one should resort to using other libraries / frameworks or write their own code from scratch.  
 This means that this framework is most likely useless to the machine learning researcher working with big-data models, the molecular researcher working with large-scale MD simulations, and certainly to companies trying to solve industrial problems. It is the Sampling-TOY-house, after all.
 
 **That being said:** We are already working on plans to allow for the treatment of larger models, in particular through the usage of symbolic differentiation and interfaces to widely used deep learning frameworks.
 
+<br/>
+
 ## The Three Building Blocks
 Here we give a high-level overview of the three building blocks the framework is comprised of: The problem library, the measurement library, 
 and the sampler library. Each library holds an interface class that serves as a base class that all other classes in the library inherit from. 
 Users will generally not need to modify the interface classes. However, they will need to understand them to a certain degree if they want to add 
 their own elements to the system, eg. if they want to add new sampling schemes.
+
+<br/>
 
 ### The Problem Library
 The problem library is given by the header file **problems.h**. It holds the sampling problems, each of which is defined as an individual class inheriting 
@@ -79,6 +87,8 @@ It holds three member vectors, `parameters` (i.e. the $x\in\mathbb{R}^{m}$ in $U
 it only holds one method, the `compute_force` routine which is a purely virtual function and needs to be defined in every child class. 
 This function will fill the force vector given the parameters, and it is called by the sampling schemes. We will see how to create a particular sampling 
 problem from this interface class in the next section.
+
+<br/>
 
 ### The Measurement Library
 The measurement library is given by the header file **measurements.h**. The classes in this file specify different measurement processes, 
@@ -233,6 +243,8 @@ The header **measurements.h** already holds a predefined measurement class, name
 $T_{kin}=\frac{1}{N_{d}}p\cdot p$, and the configurational temperature $T_{conf}=-\frac{1}{N_{d}}x\cdot F$ as samples, where $N_d$ is the number of degrees of freedom.  
 Its implementation is displayed in the next section as an example to create measurement classes derived from `IMEASUREMENT`.
 
+<br/>
+
 ### The Sampler Library
 The sampler library holds the various sampling schemes. It consists of two files: **samplers.h**, which gives the class definitions of the samplers, 
 and **samplers.cpp**, which holds the implementation of the member functions. All samplers are classes directly derived from an interface parent class 
@@ -274,6 +286,8 @@ the sampling problem passed as an argument, and collects the observables as spec
 The function _**run_mpi_simulation**_ sets up the MPI environment, calls `draw_trajectory` on every process, averages the results, and prints them to 
 a **.csv file**. It is inherited by all sampler child classes as is and **must not** be modified. 
 
+<br/>
+
 ## How to use it
 In order to use the SamplingToyhouse, we need to download the following files from the Github repository: **main.cpp**, **samplers.cpp**, **samplers.h**, 
 **measurements.h**, **problems.h** to a common folder.  
@@ -283,6 +297,8 @@ in the long run.
 After adjusting the main file (which includes the two header files), the code needs to be compiled via the MPI compiler wrapper provided by the 
 respective MPI library being used on the system. On a Linux machine using the _OpenMPI_ library and the _GCC_ compiler, the compilation is invoked via 
 `mpicxx -O3 -o main.exe main.cpp samplers.cpp`. This will create an executable called **main.exe** which can be run via `mpirun -n N main.exe`, where N needs to be replaced by the number of MPI processes that are supposed to be launched. Each process will draw a single trajectory.
+
+<br/>
 
 ### With predefined samplers, problems, and measurement objects
 In the simplest case, users might want to sample one of the problems that are already implemented in the problem library, using a sampler that 
@@ -362,6 +378,7 @@ BAYES_INFERENCE_MEANS_GAUSSMIX_2COMPONENTS_1D testproblem(filename, batchsize);
 Note that the `run_mpi_simulation` routine always takes in the same parameters, independently of the sampler, as it is a member function of the sampler 
 interface class (see the previous section). 
 
+<br/>
 
 ### With custom-built measurement objects
 Assume that we are happy with the samplers and problems that are already implemented, but we are interested in a certain observable that is not yet covered 
@@ -430,6 +447,7 @@ class our_new_measurement: public IMEASUREMENT{
 };
 ```
 
+<br/>
 
 ### With custom-built problem classes
 Assume that we have a new potential energy function $U(x)$ whose associated density $\rho$ we want to sample from. We need to add the new problem class to the header file **problems.h**. To see how to write a problem class, we simply compare two of the predefined problems, the 1-dimensinal harmonic oscillator named `HARMONIC_OSCILLATOR_1D` and the 2-dimensional double well problem named `CURVED_DOUBLE_WELL_2D`: 
@@ -526,6 +544,7 @@ In the next line of the constructor, the parameters and velocity vectors are pas
 
 Having understood where the source code of two different problem classes differs and where it is the same, we are in a good position to come up with our own problem classes.  
 
+<br/>
 
 ### With custom-built samplers
 Lastly, we need to know how to add a novel sampler to the library. This setting is a bit more complex as the definition of the class itself and their member functions are in different files. In the header **samplers.h** we need to define our new class. Comparing two samplers that are already there, the `OBABO_sampler` and the `SGHMC_sampler`, we see that, apart from the class name, they don't differ at all: 
@@ -665,6 +684,7 @@ void SGHMC_sampler::print_sampler_params(){
 
 };
 ````
+<br/>
 
 ## List of implemented samplers
 
