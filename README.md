@@ -608,10 +608,10 @@ void SGHMC_sampler::draw_trajectory(const int max_iter, IPROBLEM& problem, IMEAS
     seq.generate(seeds.begin(), seeds.end());
     twister.seed(seeds.at(0)); 
 
-	std:: normal_distribution<> normal{0,1};
+    std:: normal_distribution<> normal{0,1};
     double Rn;
 
-	auto t1 = std:: chrono::high_resolution_clock::now();
+    auto t1 = std:: chrono::high_resolution_clock::now();
 
     // MAIN LOOP.
     for ( size_t i = 1;  i <= max_iter;  ++i ) {
